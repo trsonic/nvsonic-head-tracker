@@ -56,7 +56,7 @@ For assigning the OSC messages to plugin parameters use “learn” DAW function
 You can experience some drift during the first few minutes of operation. Stay calm, the sensor needs to stabilize its temperature to provide accurate direction in horizontal plane. 
 
 ## Head Tracking in Reaper
-To remove the nasty latency caused by the Reaper's audio processing, turn off the anticipative FX processing in preferences.
+To remove the nasty latency caused by Reaper's audio processing, turn off the anticipative FX processing in preferences.
 
 ![alt text](https://github.com/trsonic/head-tracker/blob/master/images/reaper_fx_processing.png "")
 
