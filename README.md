@@ -43,9 +43,8 @@ Mount the sensor on the top of the headband, centered. The wires should be orien
 ![alt text](https://github.com/trsonic/head-tracker/blob/master/images/sensor_headband.png "")
 
 ## Interfacing Software
-Run the software (HT_OSC_Bridge.app/.exe) for converting serial data to OSC messages. Current release was designed to work with Reaper and Matthias Kronlachner's Ambisonic rotation ([ambix_rotator](http://www.matthiaskronlachner.com/?p=2015)) plugin.
-
-Set the Euler rotation order inside the plugin to: roll-pitch-yaw.
+- Download the [latest release](https://github.com/trsonic/nvsonic-head-tracker/releases) of the Head Tracker OSC Bridge or compile it yourself.
+- Run *Head Tracker OSC Bridge.exe / .app*. The current release was designed to work with Reaper and Matthias Kronlachner's Ambisonic rotation ([ambix_rotator](http://www.matthiaskronlachner.com/?p=2015)) plugin. Set the Euler rotation order inside the plugin to: roll-pitch-yaw.
 
 ![alt text](https://github.com/trsonic/head-tracker/blob/master/images/ambix_rotator.png "")
 
