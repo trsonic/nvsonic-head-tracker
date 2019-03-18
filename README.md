@@ -52,6 +52,8 @@ For assigning the OSC messages to plugin parameters use “learn” DAW function
 
 ![alt text](https://github.com/trsonic/head-tracker/blob/master/images/app_screen_shot.png "")
 
+You can also have a look at the tutorial posted by [Gabriel Zalles](https://www.linkedin.com/in/gabrielzalles/) at the [NYU Immersive Audio Group blog](https://wp.nyu.edu/immersiveaudiogroup/2018/01/26/nvsonic-headtracker-nyu/).
+
 ## Drift Performance
 You can experience some drift during the first few minutes of operation. Stay calm, the sensor needs to stabilize its temperature to provide accurate direction in horizontal plane. 
 
