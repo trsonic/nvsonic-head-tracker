@@ -66,7 +66,7 @@ public:
 
 	void timerCallback() override;
 
-	OSCSender sender;
+	OSCSender sender, sender2;
        
 private:
     //==============================================================================

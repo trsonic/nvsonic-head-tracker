@@ -178,7 +178,7 @@ void MainComponent::paint (Graphics& g)
 	g.drawText("IP Adress: 127.0.0.1", getLocalBounds().removeFromBottom(moutpos - 0).removeFromTop(30)
 		.removeFromRight(290 - marginleft).removeFromLeft(280 - marginleft), Justification::left, 1);
 
-	g.drawText("UDP Port #: 9001", getLocalBounds().removeFromBottom(moutpos - 25).removeFromTop(30)
+	g.drawText("UDP Port #: 9000", getLocalBounds().removeFromBottom(moutpos - 25).removeFromTop(30)
 		.removeFromRight(290 - marginleft).removeFromLeft(280 - marginleft), Justification::left, 1);
 
 	// version number & authors
@@ -186,7 +186,9 @@ void MainComponent::paint (Graphics& g)
 	g.setColour(clblue);
 	g.drawText("version 2.0", getLocalBounds().removeFromBottom(35).removeFromTop(30)
 		.removeFromRight(290 - marginleft).removeFromLeft(280 - marginleft), Justification::left, 1);
-	g.drawText(String(CharPointer_UTF8("\u00A9")) + " 2019 Tomasz Rudzki, Jacek Majer", getLocalBounds().removeFromBottom(35).removeFromTop(30)
+	//g.drawText(String(CharPointer_UTF8("\u00A9")) + " 2019 Tomasz Rudzki, Jacek Majer", getLocalBounds().removeFromBottom(35).removeFromTop(30)
+	//	.removeFromRight(290 - marginleft).removeFromLeft(280 - marginleft), Justification::right, 1);
+	g.drawText("2019 Tomasz Rudzki, Jacek Majer", getLocalBounds().removeFromBottom(35).removeFromTop(30)
 		.removeFromRight(290 - marginleft).removeFromLeft(280 - marginleft), Justification::right, 1);
 
 	// icons

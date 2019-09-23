@@ -27,7 +27,8 @@ Bridge::Bridge()
 {
     BaudR = 115200;
     startTimer(10);
-    sender.connect ("127.0.0.1", 9001);
+    sender.connect ("127.0.0.1", 9000);
+	sender2.connect("127.0.0.1", 9001);
 }
 
 Bridge::~Bridge()
@@ -112,21 +113,27 @@ void Bridge::timerCallback()
                 YawOUT = atan2(siny_cosp, cosy_cosp)  * (180 / double_Pi);
 
                 // Sign change
-                RollOUT = RollOUT * -1;
-                PitchOUT = PitchOUT * -1;
-                //YawOUT = YawOUT * -1;
+                RollOUT = RollOUT;
+                PitchOUT = PitchOUT;
+                YawOUT = -YawOUT;
 
-                RollOutput = String(RollOUT * -1,1);
-                PitchOutput = String(PitchOUT * -1,1);
-                YawOutput = String(YawOUT * -1,1);
+                RollOutput = String(RollOUT,1);
+                PitchOutput = String(PitchOUT,1);
+                YawOutput = String(YawOUT,1);
 
                 // Map and send OSC
-                RollOSC     = (float) jmap(RollOUT, (float) -180, (float) 180, (float) 0, (float) 1);
-                PitchOSC    = (float) jmap(PitchOUT, (float) -180, (float) 180, (float) 0, (float) 1);
-                YawOSC      = (float) jmap(YawOUT, (float) -180, (float) 180, (float) 0, (float) 1);
-                if (AXmuted == false) sender.send ("/roll/", (float) RollOSC);
-                if (AYmuted == false) sender.send ("/pitch/", (float) PitchOSC);
-                if (AZmuted == false) sender.send ("/yaw/", (float) YawOSC);
+                RollOSC     = (float) jmap(-RollOUT, (float) -180, (float) 180, (float) 0, (float) 1);
+                PitchOSC    = (float) jmap(-PitchOUT, (float) -180, (float) 180, (float) 0, (float) 1);
+                YawOSC      = (float) jmap(-YawOUT, (float) -180, (float) 180, (float) 0, (float) 1);
+                if (AXmuted == false) sender2.send ("/roll/", (float) RollOSC);
+                if (AYmuted == false) sender2.send ("/pitch/", (float) PitchOSC);
+                if (AZmuted == false) sender2.send ("/yaw/", (float) YawOSC);
+				
+				// send rpy
+				sender.send("/rendering/htrpy", RollOUT, PitchOUT, YawOUT);
+
+				// send quaternions
+				//sender.send("/rendering/quaternions/", qW, qX, qY, qZ);
             }
         }
 	}
