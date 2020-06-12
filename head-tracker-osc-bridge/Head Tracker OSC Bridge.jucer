@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="bHyyaC" name="Head Tracker OSC Bridge" projectType="guiapp"
-              jucerVersion="5.4.4" companyName="nvsonic" companyWebsite="nvsonic.io"
+              jucerVersion="5.4.7" companyName="nvsonic" companyWebsite="nvsonic.io"
               companyEmail="tom@nvsonic.io" version="2.0">
   <MAINGROUP id="RLPzK0" name="Head Tracker OSC Bridge">
     <GROUP id="{248FD7E1-7B63-4263-1B25-0B52845722A6}" name="Resources">

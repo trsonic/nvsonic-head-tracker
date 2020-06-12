@@ -23,99 +23,118 @@
 
 #include "MainComponent.h"
 
-//==============================================================================
 MainComponent::MainComponent()
 {
-	// buttons
-	brefresh.setButtonText("Refresh");
-	brefresh.setColour(TextButton::buttonColourId, clblue);
-	brefresh.addListener(this);
-	addAndMakeVisible(brefresh);
+	m_refreshButton.setButtonText("Refresh");
+	m_refreshButton.setColour(TextButton::buttonColourId, clblue);
+	m_refreshButton.setLookAndFeel(&SMLF);
+	m_refreshButton.addListener(this);
+	addAndMakeVisible(m_refreshButton);
 
-	bconnect.setButtonText("Connect");
-	bconnect.setColour(TextButton::buttonColourId, clblue);
-	bconnect.addListener(this);
-	addAndMakeVisible(bconnect);
+	m_connectButton.setButtonText("Connect");
+	m_connectButton.setColour(TextButton::buttonColourId, clblue);
+	m_connectButton.setColour(TextButton::buttonOnColourId, cgrnsh);
+	m_connectButton.setLookAndFeel(&SMLF);
+	m_connectButton.addListener(this);
+	addAndMakeVisible(m_connectButton);
 
-	breset.setButtonText("Reset");
-	breset.setColour(TextButton::buttonColourId, clblue);
-	addAndMakeVisible(breset);
-	breset.addListener(this);
+	m_resetButton.setButtonText("Reset");
+	m_resetButton.setColour(TextButton::buttonColourId, clblue);
+	m_resetButton.setLookAndFeel(&SMLF);
+	m_resetButton.addListener(this);
+	addAndMakeVisible(m_resetButton);
 
-	bmAX.setButtonText("M");
-	bmAX.setColour(TextButton::buttonColourId, clblue);
-	addAndMakeVisible(bmAX);
-	bmAX.addListener(this);
+	m_rollOscMute.setButtonText("R");
+	m_rollOscMute.setColour(TextButton::buttonColourId, clblue);
+	m_rollOscMute.setLookAndFeel(&SMLF);
+	m_rollOscMute.addListener(this);
+	addAndMakeVisible(m_rollOscMute);
 
-	bmAY.setButtonText("M");
-	bmAY.setColour(TextButton::buttonColourId, clblue);
-	addAndMakeVisible(bmAY);
-	bmAY.addListener(this);
+	m_pitchOscMute.setButtonText("P");
+	m_pitchOscMute.setColour(TextButton::buttonColourId, clblue);
+	m_pitchOscMute.setLookAndFeel(&SMLF);
+	m_pitchOscMute.addListener(this);
+	addAndMakeVisible(m_pitchOscMute);
 
-	bmAZ.setButtonText("M");
-	bmAZ.setColour(TextButton::buttonColourId, clblue);
-	addAndMakeVisible(bmAZ);
-	bmAZ.addListener(this);
+	m_yawOscMute.setButtonText("Y");
+	m_yawOscMute.setColour(TextButton::buttonColourId, clblue);
+	m_yawOscMute.setLookAndFeel(&SMLF);
+	m_yawOscMute.addListener(this);
+	addAndMakeVisible(m_yawOscMute);
 
-	// combobox
-	cb_portlist.setEditableText(false);
-	cb_portlist.setJustificationType(Justification::centred);
-	cb_portlist.setTextWhenNothingSelected(String("select device"));
-	cb_portlist.addListener(this);
-	addAndMakeVisible(cb_portlist);
+	m_rpyOscMute.setButtonText("3");
+	m_rpyOscMute.setColour(TextButton::buttonColourId, clblue);
+	m_rpyOscMute.setLookAndFeel(&SMLF);
+	m_rpyOscMute.addListener(this);
+	addAndMakeVisible(m_rpyOscMute);
 
-	// refresh port list
-	CBox_portlist = bridge.GetPortInfo();
-	cb_portlist.clear();
-	cb_portlist.addItemList(CBox_portlist, 1);
+	m_portlistCB.setEditableText(false);
+	m_portlistCB.setJustificationType(Justification::centred);
+	m_portlistCB.setTextWhenNothingSelected(String("select device"));
+	m_portlistCB.setLookAndFeel(&SMLF);
+	m_portlistCB.addListener(this);
+	addAndMakeVisible(m_portlistCB);
+	refreshPortList();
 
-	//labels
-	addAndMakeVisible(AxisX);
-	AxisX.setFont(labelfont.withPointHeight(13));
-	AxisX.setJustificationType(Justification::centredLeft);
-	AxisX.setColour(Label::textColourId, clrblue);
+	m_yprOrderCB.setEditableText(false);
+	m_yprOrderCB.setJustificationType(Justification::centred);
+	m_yprOrderCB.setTextWhenNothingSelected(String("yaw-pitch-roll"));
+	m_yprOrderCB.setLookAndFeel(&SMLF);
+	m_yprOrderCB.addListener(this);
+	addAndMakeVisible(m_yprOrderCB);
 
-	addAndMakeVisible(AxisY);
-	AxisY.setFont(labelfont.withPointHeight(13));
-	AxisY.setJustificationType(Justification::centredLeft);
-	AxisY.setColour(Label::textColourId, clrblue);
+	m_oscPresetCB.setEditableText(false);
+	m_oscPresetCB.setJustificationType(Justification::centred);
+	m_oscPresetCB.setTextWhenNothingSelected(String("select preset"));
+	m_oscPresetCB.setLookAndFeel(&SMLF);
+	m_oscPresetCB.addListener(this);
+	addAndMakeVisible(m_oscPresetCB);
 
-	addAndMakeVisible(AxisZ);
-	AxisZ.setFont(labelfont.withPointHeight(13));
-	AxisZ.setJustificationType(Justification::centredLeft);
-	AxisZ.setColour(Label::textColourId, clrblue);
+	// labels
+	Array<Label*> rpyValLabels;
+	rpyValLabels.add(&m_rollLabel);
+	rpyValLabels.add(&m_pitchLabel);
+	rpyValLabels.add(&m_yawLabel);
+	rpyValLabels.add(&m_rollOscVal);
+	rpyValLabels.add(&m_pitchOscVal);
+	rpyValLabels.add(&m_yawOscVal);
 
-	AxisY.setText("Roll (Y):", dontSendNotification);
-	AxisX.setText("Pitch (X):", dontSendNotification);
-	AxisZ.setText("Yaw (Z):", dontSendNotification);
+	for (int i = 0; i < rpyValLabels.size(); ++i)
+	{
+		rpyValLabels[i]->setFont(labelfont.withPointHeight(13));
+		rpyValLabels[i]->setJustificationType(Justification::centredRight);
+		rpyValLabels[i]->setColour(Label::textColourId, clrblue);
+		addAndMakeVisible(rpyValLabels[i]);
+	}
 
+	Array<Label*> oscLabels;
+	oscLabels.add(&m_rollOscAddress);
+	oscLabels.add(&m_pitchOscAddress);
+	oscLabels.add(&m_yawOscAddress);
+	oscLabels.add(&m_rpyOscAddress);
+	oscLabels.add(&m_rollOscMin);
+	oscLabels.add(&m_pitchOscMin);
+	oscLabels.add(&m_yawOscMin);
+	oscLabels.add(&m_rollOscMax);
+	oscLabels.add(&m_pitchOscMax);
+	oscLabels.add(&m_yawOscMax);
+	oscLabels.add(&m_ipAddress);
+	oscLabels.add(&m_portNumber);
 
-	addAndMakeVisible(AxisXval);
-	AxisXval.setFont(labelfont.withPointHeight(13));
-	AxisXval.setJustificationType(Justification::centredRight);
-	AxisXval.setColour(Label::textColourId, clrblue);
+	for (int i = 0; i < oscLabels.size(); ++i)
+	{
+		oscLabels[i]->setEditable(false, true, false);
+		oscLabels[i]->onTextChange = [this] { updateBridgeSettings(); };
+		oscLabels[i]->setColour(Label::outlineColourId, clrblue);
+		oscLabels[i]->setColour(Label::textColourId, clrblue);
+		oscLabels[i]->setFont(labelfont.withPointHeight(13));
+		oscLabels[i]->setJustificationType(Justification::centred);
+		addAndMakeVisible(oscLabels[i]);
+	}
 
-	addAndMakeVisible(AxisYval);
-	AxisYval.setFont(labelfont.withPointHeight(13));
-	AxisYval.setJustificationType(Justification::centredRight);
-	AxisYval.setColour(Label::textColourId, clrblue);
-
-	addAndMakeVisible(AxisZval);
-	AxisZval.setFont(labelfont.withPointHeight(13));
-	AxisZval.setJustificationType(Justification::centredRight);
-	AxisZval.setColour(Label::textColourId, clrblue);
-
-	// look and feeeel
-	brefresh.setLookAndFeel(&SMLF);
-	bconnect.setLookAndFeel(&SMLF);
-	breset.setLookAndFeel(&SMLF);
-	bmAX.setLookAndFeel(&SMLF);
-	bmAY.setLookAndFeel(&SMLF);
-	bmAZ.setLookAndFeel(&SMLF);
-	cb_portlist.setLookAndFeel(&SMLF);
-
+	loadSettings();
 	startTimerHz(20);
-	setSize(300, 550);
+	setSize(300, 600);
 }
 
 MainComponent::~MainComponent()
@@ -123,216 +142,280 @@ MainComponent::~MainComponent()
 	stopTimer();
 }
 
-//==============================================================================
 void MainComponent::paint (Graphics& g)
 {
-	auto titlespace = getLocalBounds().removeFromTop(35);
-    #ifdef _WIN32
-        auto titletextspaceA = getLocalBounds().removeFromTop(37).removeFromLeft(100).removeFromRight(90);
-    #else
-        auto titletextspaceA = getLocalBounds().removeFromTop(45).removeFromLeft(100).removeFromRight(90);
-    #endif
-    auto titletextspaceB = getLocalBounds().removeFromTop(40).removeFromRight(200).removeFromLeft(190);
-
-	auto seriallabelspace = getLocalBounds().removeFromBottom(505).removeFromTop(60)
-		.removeFromLeft(290).removeFromRight(280); // serial port label bounds
-	auto statuslabelspace = getLocalBounds().removeFromBottom(350).removeFromTop(60)
-		.removeFromLeft(290).removeFromRight(280); // status label bounds
-	auto osclabelspace = getLocalBounds().removeFromBottom(198).removeFromTop(60)
-		.removeFromLeft(290).removeFromRight(280); // osc label bounds
-
 	// background
 	g.fillAll(cdark);
-
-	// title
-	g.setColour(cdark);
-	g.fillRect(titlespace);
     
+	// logo & title
 	g.setColour(clblue);
-	g.setFont(titlefontA.withPointHeight(23));
-	g.drawFittedText("nvsonic", titletextspaceA, Justification::centredLeft, 1);
+	g.setFont(titlefontA.withPointHeight(25));
+	g.drawText("nvsonic", 10, 0, 90, 38, Justification::bottomLeft);
 
 	g.setColour(clrblue);
-	g.setFont(titlefontB.withPointHeight(16));
-	g.drawFittedText("Head Tracker OSC Bridge", titletextspaceB, Justification::centredRight, 1);
+	g.setFont(titlefontB.withPointHeight(17));
+	g.drawText("Head Tracker OSC Bridge", 100, 0, 190, 33, Justification::bottomRight);
 
 	// labels
+	Rectangle<float> serialLabelArea(10, 40, 280, 50);
+	Rectangle<float> imuLabelArea(10, 180, 280, 50);
+	Rectangle<float> oscLabelArea(10, 310, 280, 50);
+
 	g.setColour(clrblue);
-	g.fillRoundedRectangle(seriallabelspace.toFloat(), 3.0f);
-	g.fillRoundedRectangle(statuslabelspace.toFloat(), 3.0f);
-	g.fillRoundedRectangle(osclabelspace.toFloat(), 3.0f);
+	g.fillRoundedRectangle(serialLabelArea, 3.0f);
+	g.fillRoundedRectangle(imuLabelArea, 3.0f);
+	g.fillRoundedRectangle(oscLabelArea, 3.0f);
 
 	g.setColour(cdark);
 	g.setFont(titlefontB.withPointHeight(15));
-	g.drawText("Serial Port Configuration", seriallabelspace.removeFromRight(270), Justification::left, 1);
-	g.drawText("IMU Orientation", statuslabelspace.removeFromRight(270), Justification::left, 1);
-	g.drawText("OSC Configuration", osclabelspace.removeFromRight(270), Justification::left, 1);
+	g.drawText("Serial Port Configuration", serialLabelArea.removeFromRight(270), Justification::left);
+	g.drawText("IMU Orientation", imuLabelArea.removeFromRight(270), Justification::left);
+	g.drawText("OSC Configuration", oscLabelArea.removeFromRight(270), Justification::left);
+
+	g.drawImageAt(iserial, 210, 52);
+	//g.drawImageAt(iaxis, 225, 185);
+	//g.drawImageAt(iosc, 220, 310);
+
 
 	// other texts
 	g.setFont(titlefontB.withPointHeight(14));
 	g.setColour(clrblue);
-	g.drawText("Port List:", getLocalBounds().removeFromBottom(388).removeFromTop(30)
-		.removeFromRight(290).removeFromLeft(135), Justification::centred, 1);
-
-	g.setFont(titlefontB.withPointHeight(15));
-	g.drawText("IP Adress: 127.0.0.1", getLocalBounds().removeFromBottom(moutpos - 0).removeFromTop(30)
-		.removeFromRight(290 - marginleft).removeFromLeft(280 - marginleft), Justification::left, 1);
-
-	g.drawText("UDP Port #: 9000", getLocalBounds().removeFromBottom(moutpos - 25).removeFromTop(30)
-		.removeFromRight(290 - marginleft).removeFromLeft(280 - marginleft), Justification::left, 1);
+	g.drawText("Port List:", 10, 140, 135, 30, Justification::centred);
+	g.setFont(titlefontB.withPointHeight(13));
+	g.drawText("Roll (Y):", 20, 240, 125, 20, Justification::centredLeft);
+	g.drawText("Pitch (X):", 20, 260, 125, 20, Justification::centredLeft);
+	g.drawText("Yaw (Z):", 20, 280, 125, 20, Justification::centredLeft);
 
 	// version number & authors
 	g.setFont(titlefontB.withPointHeight(12));
 	g.setColour(clblue);
-	g.drawText("version 2.0", getLocalBounds().removeFromBottom(35).removeFromTop(30)
-		.removeFromRight(290 - marginleft).removeFromLeft(280 - marginleft), Justification::left, 1);
-	//g.drawText(String(CharPointer_UTF8("\u00A9")) + " 2019 Tomasz Rudzki, Jacek Majer", getLocalBounds().removeFromBottom(35).removeFromTop(30)
-	//	.removeFromRight(290 - marginleft).removeFromLeft(280 - marginleft), Justification::right, 1);
-	g.drawText("2019 Tomasz Rudzki, Jacek Majer", getLocalBounds().removeFromBottom(35).removeFromTop(30)
-		.removeFromRight(290 - marginleft).removeFromLeft(280 - marginleft), Justification::right, 1);
-
-	// icons
-	g.drawImageAt(iserial, 210, 62);
-	g.drawImageAt(iaxis, 232, 211);
-	g.drawImageAt(iosc, 220, 357);
-
+	g.drawText("version 3.0", 10, getHeight() - 30, 280, 20, Justification::bottomLeft);
+	g.drawText("2020 Tomasz Rudzki, Jacek Majer", 10, getHeight() - 30, 280, 20, Justification::bottomRight);
 }
 
 void MainComponent::resized()
 {
-	const int buttonHeight = 40;
+	m_refreshButton.setBounds(10, 100, 135, 30);
+	m_connectButton.setBounds(155, 100, 135, 30);
+	m_portlistCB.setBounds(155, 140, 135, 30);
+	m_resetButton.setBounds(155, 240, 135, 60);
 
-	// buttons
-	brefresh.setBounds(getLocalBounds().removeFromBottom(435).removeFromTop(buttonHeight)
-		.removeFromRight(290).removeFromLeft(135));
+	m_rollLabel.setBounds(70, 240, 65, 20);
+	m_pitchLabel.setBounds(70, 260, 65, 20);
+	m_yawLabel.setBounds(70, 280, 65, 20);
 
-	bconnect.setBounds(getLocalBounds().removeFromBottom(435).removeFromTop(buttonHeight)
-		.removeFromLeft(290).removeFromRight(135));
+	m_rollOscMute.setBounds(10, 370, 25, 25);
+	m_pitchOscMute.setBounds(10, 400, 25, 25);
+	m_yawOscMute.setBounds(10, 430, 25, 25);
+	m_rpyOscMute.setBounds(10, 460, 25, 25);
 
-	breset.setBounds(getLocalBounds().removeFromBottom(281).removeFromTop(buttonHeight - 17)
-		.removeFromLeft(290).removeFromRight(135));
+	m_rollOscAddress.setBounds(40, 370, 105, 25);
+	m_pitchOscAddress.setBounds(40, 400, 105, 25);
+	m_yawOscAddress.setBounds(40, 430, 105, 25);
+	m_rpyOscAddress.setBounds(40, 460, 105, 25);
+	m_rollOscMin.setBounds(155, 370, 40, 25);
+	m_pitchOscMin.setBounds(155, 400, 40, 25);
+	m_yawOscMin.setBounds(155, 430, 40, 25);
+	m_rollOscMax.setBounds(200, 370, 40, 25);
+	m_pitchOscMax.setBounds(200, 400, 40, 25);
+	m_yawOscMax.setBounds(200, 430, 40, 25);
+	m_rollOscVal.setBounds(245, 370, 45, 25);
+	m_pitchOscVal.setBounds(245, 400, 45, 25);
+	m_yawOscVal.setBounds(245, 430, 45, 25);
+	m_ipAddress.setBounds(10, 490, 135, 25);
+	m_portNumber.setBounds(155, 490, 135, 25);
 
-	bmAX.setBounds(getLocalBounds().removeFromBottom(statuspos - 7).removeFromTop(16)
-		.removeFromRight(290).removeFromLeft(22));
-
-	bmAY.setBounds(getLocalBounds().removeFromBottom(statuspos - 25 - 7).removeFromTop(16)
-		.removeFromRight(290).removeFromLeft(22));
-
-	bmAZ.setBounds(getLocalBounds().removeFromBottom(statuspos - 50 - 7).removeFromTop(16)
-		.removeFromRight(290).removeFromLeft(22));
-
-	//comboBox
-	cb_portlist.setBounds(getLocalBounds().removeFromBottom(388).removeFromTop(30)
-		.removeFromLeft(290).removeFromRight(135));
-
-	// labels
-	AxisY.setBounds(getLocalBounds().removeFromBottom(statuspos).removeFromTop(30)
-		.withTrimmedLeft(35).withTrimmedRight(160));
-
-	AxisX.setBounds(getLocalBounds().removeFromBottom(statuspos - 25).removeFromTop(30)
-		.withTrimmedLeft(35).withTrimmedRight(160));
-
-	AxisZ.setBounds(getLocalBounds().removeFromBottom(statuspos - 50).removeFromTop(30)
-		.withTrimmedLeft(35).withTrimmedRight(160));
-
-	AxisYval.setBounds(getLocalBounds().removeFromBottom(statuspos).removeFromTop(30)
-		.withTrimmedLeft(100).withTrimmedRight(150));
-
-	AxisXval.setBounds(getLocalBounds().removeFromBottom(statuspos - 25).removeFromTop(30)
-		.withTrimmedLeft(100).withTrimmedRight(150));
-
-	AxisZval.setBounds(getLocalBounds().removeFromBottom(statuspos - 50).removeFromTop(30)
-		.withTrimmedLeft(100).withTrimmedRight(150));
+	m_yprOrderCB.setBounds(155, 460, 135, 25);
+	m_oscPresetCB.setBounds(10, 520, 280, 25);
 }
 
 void MainComponent::comboBoxChanged(ComboBox* comboBoxThatHasChanged)
 {
-	bridge.PortN = cb_portlist.getSelectedItemIndex();
-
+	bridge.PortN = m_portlistCB.getSelectedItemIndex();
 }
 
 void MainComponent::buttonClicked(Button* buttonThatWasClicked)
 {
 
-	if (buttonThatWasClicked == &brefresh)
+	if (buttonThatWasClicked == &m_refreshButton)
 	{
-		CBox_portlist = bridge.GetPortInfo();
-		cb_portlist.clear();
-		cb_portlist.addItemList(CBox_portlist, 1);
+		refreshPortList();
 	}
-	else if (buttonThatWasClicked == &bconnect)
+	else if (buttonThatWasClicked == &m_connectButton)
 	{
-		if (bconnect.getButtonText() == "Connect")
+		if (m_connectButton.getToggleState())
 		{
-			if (bridge.Connect())
-			{
-				bconnect.setColour(TextButton::buttonColourId, cgrnsh);
-				bconnect.setButtonText("Disconnect");
-			}
+			bridge.disconnectBridge();
+			m_connectButton.setToggleState(false, dontSendNotification);
+			m_connectButton.setButtonText("Connect");
+			m_refreshButton.setEnabled(true);
+			m_portlistCB.setEnabled(true);
+			m_resetButton.setEnabled(false);
 		}
 		else
 		{
-			bridge.Disconnect();
-			bconnect.setColour(TextButton::buttonColourId, clblue);
-			bconnect.setButtonText("Connect");
+			if (bridge.connectBridge())
+			{
+				m_connectButton.setToggleState(true, dontSendNotification);
+				m_connectButton.setButtonText("Disconnect");
+				m_refreshButton.setEnabled(false);
+				m_portlistCB.setEnabled(false);
+				m_resetButton.setEnabled(true);
+			}
 		}
 	}
-	else if (buttonThatWasClicked == &breset && bridge.connected == true)
+	else if (buttonThatWasClicked == &m_resetButton && bridge.isConnected())
 	{
 		bridge.resetOrientation();
 	}
-	else if (buttonThatWasClicked == &bmAX)
+	else if (buttonThatWasClicked == &m_rollOscMute)
 	{
-		// mute code
-		if (bridge.AXmuted == false)
+		if (bridge.m_rollMuted == false)
 		{
-			bridge.AXmuted = true;
-			bmAX.setColour(TextButton::buttonColourId, cred);
+			bridge.m_rollMuted = true;
+			m_rollOscMute.setColour(TextButton::buttonColourId, cred);
 		}
-		else {
-			bridge.AXmuted = false;
-			bmAX.setColour(TextButton::buttonColourId, clblue);
+		else
+		{
+			bridge.m_rollMuted = false;
+			m_rollOscMute.setColour(TextButton::buttonColourId, clblue);
 		}
 	}
-	else if (buttonThatWasClicked == &bmAY)
+	else if (buttonThatWasClicked == &m_pitchOscMute)
 	{
-		// mute code
-		if (bridge.AYmuted == false)
+		if (bridge.m_pitchMuted == false)
 		{
-			bridge.AYmuted = true;
-			bmAY.setColour(TextButton::buttonColourId, cred);
+			bridge.m_pitchMuted = true;
+			m_pitchOscMute.setColour(TextButton::buttonColourId, cred);
 		}
-		else {
-			bridge.AYmuted = false;
-			bmAY.setColour(TextButton::buttonColourId, clblue);
+		else
+		{
+			bridge.m_pitchMuted = false;
+			m_pitchOscMute.setColour(TextButton::buttonColourId, clblue);
 		}
 	}
-	else if (buttonThatWasClicked == &bmAZ)
+	else if (buttonThatWasClicked == &m_yawOscMute)
 	{
-		// mute code
-		if (bridge.AZmuted == false)
+		if (bridge.m_yawMuted == false)
 		{
-			bridge.AZmuted = true;
-			bmAZ.setColour(TextButton::buttonColourId, cred);
+			bridge.m_yawMuted = true;
+			m_yawOscMute.setColour(TextButton::buttonColourId, cred);
 		}
-		else {
-			bridge.AZmuted = false;
-			bmAZ.setColour(TextButton::buttonColourId, clblue);
+		else
+		{
+			bridge.m_yawMuted = false;
+			m_yawOscMute.setColour(TextButton::buttonColourId, clblue);
 		}
 	}
 }
 
 void MainComponent::timerCallback()
 {
-	if (bridge.connected == true)
+	if (bridge.isConnected())
 	{
-		AxisYval.setText(bridge.RollOutput + "°", dontSendNotification);
-		AxisXval.setText(bridge.PitchOutput + "°", dontSendNotification);
-		AxisZval.setText(bridge.YawOutput + "°", dontSendNotification);
+		m_rollLabel.setText(String(bridge.getRoll(),1) + "°", dontSendNotification);
+		m_pitchLabel.setText(String(bridge.getPitch(),1) + "°", dontSendNotification);
+		m_yawLabel.setText(String(bridge.getYaw(),1) + "°", dontSendNotification);
+		m_rollOscVal.setText(String(bridge.getRollOSC(), 2), dontSendNotification);
+		m_pitchOscVal.setText(String(bridge.getPitchOSC(), 2), dontSendNotification);
+		m_yawOscVal.setText(String(bridge.getYawOSC(), 2), dontSendNotification);
 	}
-	else {
-		AxisYval.setText("", dontSendNotification);
-		AxisXval.setText("", dontSendNotification);
-		AxisZval.setText("", dontSendNotification);
+	else
+	{
+		m_rollLabel.setText("", dontSendNotification);
+		m_pitchLabel.setText("", dontSendNotification);
+		m_yawLabel.setText("", dontSendNotification);
+		m_rollOscVal.setText("", dontSendNotification);
+		m_pitchOscVal.setText("", dontSendNotification);
+		m_yawOscVal.setText("", dontSendNotification);
 	}
+}
+
+void MainComponent::refreshPortList()
+{
+	StringArray CBox_portlist = bridge.getPortInfo();
+	m_portlistCB.clear();
+	m_portlistCB.addItemList(CBox_portlist, 1);
+}
+
+void MainComponent::updateBridgeSettings()
+{
+	bridge.setupRollOSC(m_rollOscAddress.getText(), m_rollOscMin.getText().getFloatValue(), m_rollOscMax.getText().getFloatValue());
+	bridge.setupPitchOSC(m_pitchOscAddress.getText(), m_pitchOscMin.getText().getFloatValue(), m_pitchOscMax.getText().getFloatValue());
+	bridge.setupYawOSC(m_yawOscAddress.getText(), m_yawOscMin.getText().getFloatValue(), m_yawOscMax.getText().getFloatValue());
+	bridge.setupIp(m_ipAddress.getText(), m_portNumber.getText().getIntValue());
+}
+
+void MainComponent::loadSettings()
+{
+	PropertiesFile::Options options;
+	options.applicationName = "HTOSCBridgeSettings";
+	options.filenameSuffix = ".conf";
+	options.osxLibrarySubFolder = "Application Support";
+	options.folderName = File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile).getParentDirectory().getFullPathName();
+	options.storageFormat = PropertiesFile::storeAsXML;
+	appSettings.setStorageParameters(options);
+
+	if (appSettings.getUserSettings()->getBoolValue("loadSettingsFile"))
+	{
+		//// osc
+		//clientTxIpLabel.setText(appSettings.getUserSettings()->getValue("clientTxIp"), dontSendNotification);
+		//clientTxPortLabel.setText(appSettings.getUserSettings()->getValue("clientTxPort"), dontSendNotification);
+		//clientRxPortLabel.setText(appSettings.getUserSettings()->getValue("clientRxPort"), dontSendNotification);
+
+		//// localisation component
+		//m_localisationComponent.setAudioFilesDir(appSettings.getUserSettings()->getValue("locCompAudioFilesDir"));
+
+		//// stimulus player
+		//m_stimulusPlayer.setAudioFilesDir(appSettings.getUserSettings()->getValue("stimPlayerAudioFilesDir"));
+
+		//// renderer view
+		//m_rendererView.setCurrentTab(appSettings.getUserSettings()->getValue("rendererViewTabIndex"));
+
+		//// router
+		//m_lspkRouter.loadRoutingFile(appSettings.getUserSettings()->getValue("routingFile"));
+		//m_lspkRouter.loadCalibrationFile(appSettings.getUserSettings()->getValue("calibrationFile"));
+	}
+
+	m_rollOscAddress.setText("/roll/", dontSendNotification);
+	m_pitchOscAddress.setText("/pitch/", dontSendNotification);
+	m_yawOscAddress.setText("/yaw/", dontSendNotification);
+	m_rpyOscAddress.setText("/rendering/ypr/", dontSendNotification);
+
+	m_rollOscMin.setText("180", dontSendNotification);
+	m_pitchOscMin.setText("180", dontSendNotification);
+	m_yawOscMin.setText("180", dontSendNotification);
+
+	m_rollOscMax.setText("-180", dontSendNotification);
+	m_pitchOscMax.setText("-180", dontSendNotification);
+	m_yawOscMax.setText("-180", dontSendNotification);
+
+	m_ipAddress.setText("127.0.0.1", dontSendNotification);
+	m_portNumber.setText("9001", dontSendNotification);
+	
+	updateBridgeSettings();
+}
+
+void MainComponent::saveSettings()
+{
+
+	//// osc
+	//appSettings.getUserSettings()->setValue("clientTxIp", clientTxIpLabel.getText());
+	//appSettings.getUserSettings()->setValue("clientTxPort", clientTxPortLabel.getText());
+	//appSettings.getUserSettings()->setValue("clientRxPort", clientRxPortLabel.getText());
+
+	//// localisation component
+	//appSettings.getUserSettings()->setValue("locCompAudioFilesDir", m_localisationComponent.getAudioFilesDir());
+
+	//// stimulus player
+	//appSettings.getUserSettings()->setValue("stimPlayerAudioFilesDir", m_stimulusPlayer.getAudioFilesDir());
+
+	//// renderer view
+	//appSettings.getUserSettings()->setValue("rendererViewTabIndex", m_rendererView.getCurrentTab());
+
+	//// output router
+	//appSettings.getUserSettings()->setValue("routingFile", m_lspkRouter.getRoutingFilePath());
+	//appSettings.getUserSettings()->setValue("calibrationFile", m_lspkRouter.getCalibrationFilePath());
+
+	appSettings.getUserSettings()->setValue("loadSettingsFile", true);
 }

@@ -27,20 +27,18 @@ Bridge::Bridge()
 {
     BaudR = 115200;
     startTimer(10);
-    sender.connect ("127.0.0.1", 9000);
-	sender2.connect("127.0.0.1", 9001);
 }
 
 Bridge::~Bridge()
 {
-	if (connected == true)
+	if (m_connected == true)
 	{
-		Disconnect();
+		disconnectBridge();
 	}   
     stopTimer();
 }
 
-StringArray Bridge::GetPortInfo()
+StringArray Bridge::getPortInfo()
 {
     port_number = comEnumerate();
     for(port_index=0; port_index < port_number; port_index++)
@@ -48,47 +46,50 @@ StringArray Bridge::GetPortInfo()
     return portlist.getAllValues();
 }
 
-bool Bridge::Connect()
+bool Bridge::connectBridge()
 {
-    port_state=comOpen(PortN,BaudR);
-	if(port_state == 1)
-		{
-            connected = true;
-         	return true;
-	}
-	else
+    port_state = comOpen(PortN, BaudR);
+    if (port_state == 1)
     {
-            return false;
-    }		
+        sender.connect(m_ipAddress, m_oscPortNumber);
+        m_connected = true;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
-
-void Bridge::Disconnect()
+void Bridge::disconnectBridge()
 {
     comClose(PortN);
-    connected = false;
+    sender.disconnect();
+    m_connected = false;
+}
+
+bool Bridge::isConnected()
+{
+    return m_connected;
 }
 
 void Bridge::timerCallback()
 {
-	if(connected) {
-        
+	if(m_connected)
+    {    
         memset(&readBuffer[0], 0, sizeof(readBuffer));
         comRead(PortN, readBuffer, 128);
         
         if(strlen(readBuffer) != 0)
         {
-            // line processing
-            quaternions = StringArray::fromTokens(readBuffer, ",", "\"");
-			// DBG(String(quaternions.size()));
-            if(quaternions.size() == 4) // size > 4 is probably the result of overflowed buffer, this should not happen in normal operation
+            m_quatsReceived = StringArray::fromTokens(readBuffer, ",", "\"");
+            if(m_quatsReceived.size() == 4)
             {
-                qlW = quaternions[0].getFloatValue();
-                qlX = quaternions[1].getFloatValue();
-                qlY = quaternions[2].getFloatValue();
-                qlZ = quaternions[3].getFloatValue();
-                //std::cout << "W: " << String(qlW) << " X: " << String(qlX) << " Y: " << String(qlW) << " Z: " << String(qlZ) << "\n";
-                quaternions.clearQuick();
+                qlW = m_quatsReceived[0].getFloatValue();
+                qlX = m_quatsReceived[1].getFloatValue();
+                qlY = m_quatsReceived[2].getFloatValue();
+                qlZ = m_quatsReceived[3].getFloatValue();
+                m_quatsReceived.clearQuick();
 
                 qW = qbW * qlW + qbX * qlX + qbY * qlY + qbZ * qlZ;
                 qX = qbW * qlX - qbX * qlW - qbY * qlZ + qbZ * qlY;
@@ -96,41 +97,35 @@ void Bridge::timerCallback()
                 qZ = qbW * qlZ - qbX * qlY + qbY * qlX - qbZ * qlW;
 
                 // roll (y-axis rotation)
-                double sinr_cosp = +2.0 * (qW * qX + qY * qZ);
-                double cosr_cosp = +1.0 - 2.0 * (qX * qX + qY * qY);
-                PitchOUT = atan2(sinr_cosp, cosr_cosp)  * (180 / double_Pi);
-
-                // pitch (x-axis rotation)
                 double sinp = +2.0 * (qW * qY - qZ * qX);
                 if (fabs(sinp) >= 1)
-                    RollOUT = copysign(double_Pi / 2, sinp)  * (180 / double_Pi); // use 90 degrees if out of range
+                    m_roll = (float) copysign(double_Pi / 2, sinp) * (180 / double_Pi); // use 90 degrees if out of range
                 else
-                    RollOUT = asin(sinp)  * (180 / double_Pi);
+                    m_roll = (float) asin(sinp) * (180 / double_Pi);
+
+                // pitch (x-axis rotation)
+                double sinr_cosp = +2.0 * (qW * qX + qY * qZ);
+                double cosr_cosp = +1.0 - 2.0 * (qX * qX + qY * qY);
+                m_pitch = (float) atan2(sinr_cosp, cosr_cosp)  * (180 / double_Pi);
 
                 // yaw (z-axis rotation)
                 double siny_cosp = +2.0 * (qW * qZ + qX * qY);
                 double cosy_cosp = +1.0 - 2.0 * (qY * qY + qZ * qZ);
-                YawOUT = atan2(siny_cosp, cosy_cosp)  * (180 / double_Pi);
+                m_yaw = (float) atan2(siny_cosp, cosy_cosp)  * (180 / double_Pi) * -1;
 
-                // Sign change
-                RollOUT = RollOUT;
-                PitchOUT = PitchOUT;
-                YawOUT = -YawOUT;
-
-                RollOutput = String(RollOUT,1);
-                PitchOutput = String(PitchOUT,1);
-                YawOutput = String(YawOUT,1);
+                // console output
+                // DBG("Roll: " + String(m_roll) + ", Pitch: " + String(m_pitch) + ", Yaw: " + String(m_yaw));
 
                 // Map and send OSC
-                RollOSC     = (float) jmap(-RollOUT, (float) -180, (float) 180, (float) 0, (float) 1);
-                PitchOSC    = (float) jmap(-PitchOUT, (float) -180, (float) 180, (float) 0, (float) 1);
-                YawOSC      = (float) jmap(-YawOUT, (float) -180, (float) 180, (float) 0, (float) 1);
-                if (AXmuted == false) sender2.send ("/roll/", (float) RollOSC);
-                if (AYmuted == false) sender2.send ("/pitch/", (float) PitchOSC);
-                if (AZmuted == false) sender2.send ("/yaw/", (float) YawOSC);
+                m_rollOSC     = (float) jmap(m_roll, (float) -180, (float) 180, m_rollOscMin, m_rollOscMax);
+                m_pitchOSC    = (float) jmap(m_pitch, (float) -180, (float) 180, m_pitchOscMin, m_pitchOscMax);
+                m_yawOSC      = (float) jmap(m_yaw, (float) -180, (float) 180, m_yawOscMin, m_yawOscMax);
+                if (!m_rollMuted) sender.send (m_rollOscAddress, (float) m_rollOSC);
+                if (!m_pitchMuted) sender.send (m_pitchOscAddress, (float) m_pitchOSC);
+                if (!m_yawMuted) sender.send (m_yawOscAddress, (float) m_yawOSC);
 				
 				// send rpy
-				sender.send("/rendering/htrpy", RollOUT, PitchOUT, YawOUT);
+				// sender2.send("/rendering/htrpy", RollOUT, PitchOUT, YawOUT);
 
 				// send quaternions
 				//sender.send("/rendering/quaternions/", qW, qX, qY, qZ);
@@ -145,4 +140,61 @@ void Bridge::resetOrientation()
 	qbX = qlX;
 	qbY = qlY;
 	qbZ = qlZ;
+}
+
+float Bridge::getRoll()
+{
+    return m_roll;
+}
+
+float Bridge::getPitch()
+{
+    return m_pitch;
+}
+
+float Bridge::getYaw()
+{
+    return m_yaw;
+}
+
+float Bridge::getRollOSC()
+{
+    return m_rollOSC;
+}
+
+float Bridge::getPitchOSC()
+{
+    return m_pitchOSC;
+}
+
+float Bridge::getYawOSC()
+{
+    return m_yawOSC;
+}
+
+void Bridge::setupRollOSC(String address, float min, float max)
+{
+    m_rollOscAddress = address;
+    m_rollOscMin = min;
+    m_rollOscMax = max;
+}
+
+void Bridge::setupPitchOSC(String address, float min, float max)
+{
+    m_pitchOscAddress = address;
+    m_pitchOscMin = min;
+    m_pitchOscMax = max;
+}
+
+void Bridge::setupYawOSC(String address, float min, float max)
+{
+    m_yawOscAddress = address;
+    m_yawOscMin = min;
+    m_yawOscMax = max;
+}
+
+void Bridge::setupIp(String address, int port)
+{
+    m_ipAddress = address;
+    m_oscPortNumber = port;
 }

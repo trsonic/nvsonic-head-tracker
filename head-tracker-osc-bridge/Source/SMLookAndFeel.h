@@ -82,18 +82,23 @@ public:
 	void drawComboBox(Graphics& g, int width, int height, const bool /*isButtonDown*/,
 		int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box) override
 	{
-		g.fillAll(clrblue);
+		g.setColour(clrblue);
+		g.fillRoundedRectangle(0, 0, width, height, 3.0f);
+
+		//g.fillAll(clrblue);
 		// const Colour buttonColour(box.findColour(ComboBox::buttonColourId));
 
-		if (box.isEnabled() && box.hasKeyboardFocus(false))
-		{
-			g.setColour(clrblue);
-		}
-		else
-		{
-			g.setColour(clblue);
-			g.drawRect(0, 0, width, height);
-		}
+		//if (box.isEnabled() && box.hasKeyboardFocus(false))
+		//{
+		//	g.setColour(clrblue);
+		//	g.fillRoundedRectangle(0, 0, width, height, 3.0f);
+		//}
+		//else
+		//{
+		//	g.setColour(clblue);
+		//	//g.drawRect(0, 0, width, height);
+		//	g.fillRoundedRectangle(0, 0, width, height, 3.0f);
+		//}
 
 		const float arrowX = 0.3f;
 		const float arrowH = 0.2f;
@@ -111,4 +116,33 @@ public:
 		g.fillPath(p);
 	}
 
+	//void drawLabel(Graphics& g, Label& label)
+	//{
+	//	//g.fillAll(label.findColour(Label::backgroundColourId));
+
+	//	//if (!label.isBeingEdited())
+	//	//{
+	//	//	auto alpha = label.isEnabled() ? 1.0f : 0.5f;
+	//	//	const Font font(getLabelFont(label));
+
+	//	//	g.setColour(cdark);
+	//	//	g.setFont(font);
+
+	//	//	auto textArea = getLabelBorderSize(label).subtractedFrom(label.getLocalBounds());
+
+	//	//	g.drawFittedText(label.getText(), textArea, label.getJustificationType(),
+	//	//		jmax(1, (int)(textArea.getHeight() / font.getHeight())),
+	//	//		label.getMinimumHorizontalScale());
+
+	//	//	g.setColour(label.findColour(Label::outlineColourId).withMultipliedAlpha(alpha));
+	//	//}
+	//	//else if (label.isEnabled())
+	//	//{
+	//	//	g.setColour(label.findColour(Label::outlineColourId));
+	//	//}
+
+	//	g.setColour(cdark.brighter());
+	//	g.fillRoundedRectangle(label.getLocalBounds().toFloat(), 3.0f);
+	//	// g.drawRect(label.getLocalBounds());
+	//}
 };

@@ -32,43 +32,53 @@ class Bridge : private Timer
 public:
     Bridge();    
     ~Bridge();
-        
-    int BaudR;
-    int PortN;
     
-    int port_number, port_index, port_state;
-    
-    char readBuffer[128];
+	StringArray getPortInfo();
+    bool connectBridge();
+    void disconnectBridge();
+	bool isConnected();
+	void timerCallback() override;
+	void resetOrientation();
 
+	float getRoll();
+	float getPitch();
+	float getYaw();
+	float getRollOSC();
+	float getPitchOSC();
+	float getYawOSC();
+
+	void setupRollOSC(String address, float min, float max);
+	void setupPitchOSC(String address, float min, float max);
+	void setupYawOSC(String address, float min, float max);
+	void setupIp(String address, int port);
+
+	int BaudR, PortN;
+	bool m_rollMuted = false;
+	bool m_pitchMuted = false;
+	bool m_yawMuted = false;
+       
+private:
+	StringPairArray portlist;
+
+	int port_number, port_index, port_state;
+	char readBuffer[128];
+	StringArray m_quatsReceived;
 	float qW, qX, qY, qZ;
 	float qlW, qlX, qlY, qlZ;
 	float qbW = 1, qbX = 0, qbY = 0, qbZ = 0;
 
-	float RollOUT, PitchOUT, YawOUT;
-    float RollOSC, PitchOSC, YawOSC;
-    
-	String RollOutput = "0";
-	String PitchOutput = "0";
-	String YawOutput = "0";
-    
-    bool connected = false;
-    bool AXmuted = false;
-    bool AYmuted = false;
-    bool AZmuted = false;
-    
-    StringPairArray portlist;
-    StringArray quaternions;
-    
-    StringArray GetPortInfo();
-    bool Connect();
-    void Disconnect();
-	void resetOrientation();
+	float m_roll, m_pitch, m_yaw;
+	float m_rollOscMin, m_pitchOscMin, m_yawOscMin;
+	float m_rollOscMax, m_pitchOscMax, m_yawOscMax;
+	String m_rollOscAddress, m_pitchOscAddress, m_yawOscAddress;
+	float m_rollOSC, m_pitchOSC, m_yawOSC;
 
-	void timerCallback() override;
+	bool m_connected = false;
 
-	OSCSender sender, sender2;
-       
-private:
-    //==============================================================================
+	String m_ipAddress = "127.0.0.1";
+	int m_oscPortNumber = 9001;
+
+	OSCSender sender;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Bridge)
 };        

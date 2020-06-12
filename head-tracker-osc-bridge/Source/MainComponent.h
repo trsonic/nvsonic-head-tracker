@@ -22,41 +22,45 @@
 */
 
 #pragma once
-
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Bridge.h"
 #include "SMLookAndFeel.h"
 
-
-//==============================================================================
 class MainComponent   : public Component,
 						public Button::Listener,
 						public ComboBox::Listener,
 						private Timer
 {
 public:
-    //==============================================================================
     MainComponent();
     ~MainComponent();
 
-	// look and feel
 	SMLookAndFeel SMLF;
 
 	void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
 	void buttonClicked(Button* buttonThatWasClicked) override;
 	void timerCallback() override;
-    //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
 
 private:
-    //==============================================================================
-	StringArray CBox_portlist;
+	void refreshPortList();
+	void updateBridgeSettings();
+	void loadSettings();
+	void saveSettings();
+	ApplicationProperties appSettings;
 
-	TextButton brefresh, bconnect, breset, bmAX, bmAY, bmAZ;
-	ComboBox cb_portlist;
-	Label AxisX, AxisY, AxisZ;
-	Label AxisXval, AxisYval, AxisZval;
+	TextButton m_refreshButton, m_connectButton, m_resetButton;
+	TextButton m_rollOscMute, m_pitchOscMute, m_yawOscMute, m_rpyOscMute;
+	ComboBox m_portlistCB, m_yprOrderCB, m_oscPresetCB;
+	Label m_rollLabel, m_pitchLabel, m_yawLabel;
+
+	Label m_rollOscAddress, m_pitchOscAddress, m_yawOscAddress, m_rpyOscAddress;
+	Label m_rollOscMin, m_pitchOscMin, m_yawOscMin;
+	Label m_rollOscMax, m_pitchOscMax, m_yawOscMax;
+	Label m_rollOscVal, m_pitchOscVal, m_yawOscVal;
+	Label m_ipAddress, m_portNumber;
+	
 	Bridge bridge;
 
 	// colors
@@ -71,11 +75,6 @@ private:
 	const Font titlefontA = Font(Typeface::createSystemTypefaceFor(BinaryData::Tbold_ttf, BinaryData::Tbold_ttfSize));
 	const Font titlefontB = Font(Typeface::createSystemTypefaceFor(BinaryData::segoeui_ttf, BinaryData::segoeui_ttfSize));
 	const Font labelfont = Font(Typeface::createSystemTypefaceFor(BinaryData::segoeui_ttf, BinaryData::segoeui_ttfSize));
-
-	// visual offsets
-	int statuspos = 284;
-	int moutpos = 130;
-	int marginleft = 10;
 
 	// images
 	Image iserial = ImageCache::getFromMemory(BinaryData::serial_png, BinaryData::serial_pngSize);
