@@ -47,16 +47,13 @@ public:
 	float getPitchOSC();
 	float getYawOSC();
 
-	void setupRollOSC(String address, float min, float max);
-	void setupPitchOSC(String address, float min, float max);
-	void setupYawOSC(String address, float min, float max);
+	void setupRollOSC(bool isActive, String address, float min, float max);
+	void setupPitchOSC(bool isActive, String address, float min, float max);
+	void setupYawOSC(bool isActive, String address, float min, float max);
+	void setupRpyOSC(bool isActive, String address, String key);
 	void setupIp(String address, int port);
 
-	int BaudR, PortN;
-	bool m_rollMuted = false;
-	bool m_pitchMuted = false;
-	bool m_yawMuted = false;
-       
+	int BaudR, PortN;       
 private:
 	StringPairArray portlist;
 
@@ -70,9 +67,10 @@ private:
 	float m_roll, m_pitch, m_yaw;
 	float m_rollOscMin, m_pitchOscMin, m_yawOscMin;
 	float m_rollOscMax, m_pitchOscMax, m_yawOscMax;
-	String m_rollOscAddress, m_pitchOscAddress, m_yawOscAddress;
+	String m_rollOscAddress, m_pitchOscAddress, m_yawOscAddress, m_rpyOscAddress, m_rpyOscKey;
 	float m_rollOSC, m_pitchOSC, m_yawOSC;
 
+	bool m_rollActive, m_pitchActive, m_yawActive, m_rpyActive;
 	bool m_connected = false;
 
 	String m_ipAddress = "127.0.0.1";

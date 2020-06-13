@@ -44,50 +44,62 @@ MainComponent::MainComponent()
 	m_resetButton.addListener(this);
 	addAndMakeVisible(m_resetButton);
 
-	m_rollOscMute.setButtonText("R");
-	m_rollOscMute.setColour(TextButton::buttonColourId, clblue);
-	m_rollOscMute.setLookAndFeel(&SMLF);
-	m_rollOscMute.addListener(this);
-	addAndMakeVisible(m_rollOscMute);
+	m_rollOscActive.setButtonText("R");
+	m_rollOscActive.setClickingTogglesState(true);
+	m_rollOscActive.onStateChange = [this] { updateBridgeSettings(); };
+	m_rollOscActive.setColour(TextButton::buttonColourId, clblue);
+	m_rollOscActive.setColour(TextButton::buttonOnColourId, cgrnsh);
+	m_rollOscActive.setLookAndFeel(&SMLF);
+	addAndMakeVisible(m_rollOscActive);
 
-	m_pitchOscMute.setButtonText("P");
-	m_pitchOscMute.setColour(TextButton::buttonColourId, clblue);
-	m_pitchOscMute.setLookAndFeel(&SMLF);
-	m_pitchOscMute.addListener(this);
-	addAndMakeVisible(m_pitchOscMute);
+	m_pitchOscActive.setButtonText("P");
+	m_pitchOscActive.setClickingTogglesState(true);
+	m_pitchOscActive.onStateChange = [this] { updateBridgeSettings(); };
+	m_pitchOscActive.setColour(TextButton::buttonColourId, clblue);
+	m_pitchOscActive.setColour(TextButton::buttonOnColourId, cgrnsh);
+	m_pitchOscActive.setLookAndFeel(&SMLF);
+	addAndMakeVisible(m_pitchOscActive);
 
-	m_yawOscMute.setButtonText("Y");
-	m_yawOscMute.setColour(TextButton::buttonColourId, clblue);
-	m_yawOscMute.setLookAndFeel(&SMLF);
-	m_yawOscMute.addListener(this);
-	addAndMakeVisible(m_yawOscMute);
+	m_yawOscActive.setButtonText("Y");
+	m_yawOscActive.setClickingTogglesState(true);
+	m_yawOscActive.onStateChange = [this] { updateBridgeSettings(); };
+	m_yawOscActive.setColour(TextButton::buttonColourId, clblue);
+	m_yawOscActive.setColour(TextButton::buttonOnColourId, cgrnsh);
+	m_yawOscActive.setLookAndFeel(&SMLF);
+	addAndMakeVisible(m_yawOscActive);
 
-	m_rpyOscMute.setButtonText("3");
-	m_rpyOscMute.setColour(TextButton::buttonColourId, clblue);
-	m_rpyOscMute.setLookAndFeel(&SMLF);
-	m_rpyOscMute.addListener(this);
-	addAndMakeVisible(m_rpyOscMute);
+	m_rpyOscActive.setButtonText("3");
+	m_rpyOscActive.setClickingTogglesState(true);
+	m_rpyOscActive.onStateChange = [this] { updateBridgeSettings(); };
+	m_rpyOscActive.setColour(TextButton::buttonColourId, clblue);
+	m_rpyOscActive.setColour(TextButton::buttonOnColourId, cgrnsh);
+	m_rpyOscActive.setLookAndFeel(&SMLF);
+	addAndMakeVisible(m_rpyOscActive);
 
 	m_portlistCB.setEditableText(false);
 	m_portlistCB.setJustificationType(Justification::centred);
 	m_portlistCB.setTextWhenNothingSelected(String("select device"));
 	m_portlistCB.setLookAndFeel(&SMLF);
-	m_portlistCB.addListener(this);
+	m_portlistCB.onChange = [this] { bridge.PortN = m_portlistCB.getSelectedItemIndex(); };
 	addAndMakeVisible(m_portlistCB);
 	refreshPortList();
 
 	m_yprOrderCB.setEditableText(false);
 	m_yprOrderCB.setJustificationType(Justification::centred);
-	m_yprOrderCB.setTextWhenNothingSelected(String("yaw-pitch-roll"));
+	StringArray rpyKeys = { "Roll; Pitch; Yaw", "Yaw; Pitch; Roll", "Pitch; Roll; Yaw", "Yaw; Roll; Pitch", "Roll; Yaw; Pitch", "Pitch; Yaw; Roll" };
+	m_yprOrderCB.addItemList(rpyKeys, 1);
+	m_yprOrderCB.setSelectedId(1, dontSendNotification);
 	m_yprOrderCB.setLookAndFeel(&SMLF);
-	m_yprOrderCB.addListener(this);
+	m_yprOrderCB.onChange = [this] { updateBridgeSettings(); };
 	addAndMakeVisible(m_yprOrderCB);
 
 	m_oscPresetCB.setEditableText(false);
 	m_oscPresetCB.setJustificationType(Justification::centred);
+	StringArray presets = { "default (Reaper - Ambix Rotator)", "AudioLab SALTE"};
+	m_oscPresetCB.addItemList(presets, 1);
 	m_oscPresetCB.setTextWhenNothingSelected(String("select preset"));
 	m_oscPresetCB.setLookAndFeel(&SMLF);
-	m_oscPresetCB.addListener(this);
+	m_oscPresetCB.onChange = [this] { loadPreset(m_oscPresetCB.getSelectedId()); };
 	addAndMakeVisible(m_oscPresetCB);
 
 	// labels
@@ -125,8 +137,10 @@ MainComponent::MainComponent()
 	{
 		oscLabels[i]->setEditable(false, true, false);
 		oscLabels[i]->onTextChange = [this] { updateBridgeSettings(); };
-		oscLabels[i]->setColour(Label::outlineColourId, clrblue);
-		oscLabels[i]->setColour(Label::textColourId, clrblue);
+		//oscLabels[i]->setColour(Label::outlineColourId, clrblue);
+		oscLabels[i]->setLookAndFeel(&SMLF);
+		oscLabels[i]->setColour(Label::textColourId, cdark);
+		oscLabels[i]->setColour(Label::backgroundColourId, clrblue);
 		oscLabels[i]->setFont(labelfont.withPointHeight(13));
 		oscLabels[i]->setJustificationType(Justification::centred);
 		addAndMakeVisible(oscLabels[i]);
@@ -204,10 +218,10 @@ void MainComponent::resized()
 	m_pitchLabel.setBounds(70, 260, 65, 20);
 	m_yawLabel.setBounds(70, 280, 65, 20);
 
-	m_rollOscMute.setBounds(10, 370, 25, 25);
-	m_pitchOscMute.setBounds(10, 400, 25, 25);
-	m_yawOscMute.setBounds(10, 430, 25, 25);
-	m_rpyOscMute.setBounds(10, 460, 25, 25);
+	m_rollOscActive.setBounds(10, 370, 25, 25);
+	m_pitchOscActive.setBounds(10, 400, 25, 25);
+	m_yawOscActive.setBounds(10, 430, 25, 25);
+	m_rpyOscActive.setBounds(10, 460, 25, 25);
 
 	m_rollOscAddress.setBounds(40, 370, 105, 25);
 	m_pitchOscAddress.setBounds(40, 400, 105, 25);
@@ -227,11 +241,6 @@ void MainComponent::resized()
 
 	m_yprOrderCB.setBounds(155, 460, 135, 25);
 	m_oscPresetCB.setBounds(10, 520, 280, 25);
-}
-
-void MainComponent::comboBoxChanged(ComboBox* comboBoxThatHasChanged)
-{
-	bridge.PortN = m_portlistCB.getSelectedItemIndex();
 }
 
 void MainComponent::buttonClicked(Button* buttonThatWasClicked)
@@ -268,45 +277,6 @@ void MainComponent::buttonClicked(Button* buttonThatWasClicked)
 	{
 		bridge.resetOrientation();
 	}
-	else if (buttonThatWasClicked == &m_rollOscMute)
-	{
-		if (bridge.m_rollMuted == false)
-		{
-			bridge.m_rollMuted = true;
-			m_rollOscMute.setColour(TextButton::buttonColourId, cred);
-		}
-		else
-		{
-			bridge.m_rollMuted = false;
-			m_rollOscMute.setColour(TextButton::buttonColourId, clblue);
-		}
-	}
-	else if (buttonThatWasClicked == &m_pitchOscMute)
-	{
-		if (bridge.m_pitchMuted == false)
-		{
-			bridge.m_pitchMuted = true;
-			m_pitchOscMute.setColour(TextButton::buttonColourId, cred);
-		}
-		else
-		{
-			bridge.m_pitchMuted = false;
-			m_pitchOscMute.setColour(TextButton::buttonColourId, clblue);
-		}
-	}
-	else if (buttonThatWasClicked == &m_yawOscMute)
-	{
-		if (bridge.m_yawMuted == false)
-		{
-			bridge.m_yawMuted = true;
-			m_yawOscMute.setColour(TextButton::buttonColourId, cred);
-		}
-		else
-		{
-			bridge.m_yawMuted = false;
-			m_yawOscMute.setColour(TextButton::buttonColourId, clblue);
-		}
-	}
 }
 
 void MainComponent::timerCallback()
@@ -340,10 +310,24 @@ void MainComponent::refreshPortList()
 
 void MainComponent::updateBridgeSettings()
 {
-	bridge.setupRollOSC(m_rollOscAddress.getText(), m_rollOscMin.getText().getFloatValue(), m_rollOscMax.getText().getFloatValue());
-	bridge.setupPitchOSC(m_pitchOscAddress.getText(), m_pitchOscMin.getText().getFloatValue(), m_pitchOscMax.getText().getFloatValue());
-	bridge.setupYawOSC(m_yawOscAddress.getText(), m_yawOscMin.getText().getFloatValue(), m_yawOscMax.getText().getFloatValue());
+	if (m_rollOscAddress.getText().isEmpty()) m_rollOscAddress.setText("/roll/", dontSendNotification);
+	if (m_pitchOscAddress.getText().isEmpty()) m_pitchOscAddress.setText("/pitch/", dontSendNotification);
+	if (m_yawOscAddress.getText().isEmpty()) m_yawOscAddress.setText("/yaw/", dontSendNotification);
+	if (m_rpyOscAddress.getText().isEmpty()) m_rpyOscAddress.setText("/rpy/", dontSendNotification);
+
+	if (!m_rollOscAddress.getText().startsWithChar('/')) m_rollOscAddress.setText("/" + m_rollOscAddress.getText(), dontSendNotification);
+	if (!m_pitchOscAddress.getText().startsWithChar('/')) m_pitchOscAddress.setText("/" + m_pitchOscAddress.getText(), dontSendNotification);
+	if (!m_yawOscAddress.getText().startsWithChar('/')) m_yawOscAddress.setText("/" + m_yawOscAddress.getText(), dontSendNotification);
+	if (!m_rpyOscAddress.getText().startsWithChar('/')) m_rpyOscAddress.setText("/" + m_rpyOscAddress.getText(), dontSendNotification);
+
+	bridge.setupRollOSC(m_rollOscActive.getToggleState(), m_rollOscAddress.getText(), m_rollOscMin.getText().getFloatValue(), m_rollOscMax.getText().getFloatValue());
+	bridge.setupPitchOSC(m_pitchOscActive.getToggleState(), m_pitchOscAddress.getText(), m_pitchOscMin.getText().getFloatValue(), m_pitchOscMax.getText().getFloatValue());
+	bridge.setupYawOSC(m_yawOscActive.getToggleState(), m_yawOscAddress.getText(), m_yawOscMin.getText().getFloatValue(), m_yawOscMax.getText().getFloatValue());
+	StringArray rpyKeys = { "rpy", "ypr", "pry", "yrp", "ryp", "pyr" };
+	bridge.setupRpyOSC(m_rpyOscActive.getToggleState(), m_rpyOscAddress.getText(), rpyKeys[m_yprOrderCB.getSelectedItemIndex()]);
 	bridge.setupIp(m_ipAddress.getText(), m_portNumber.getText().getIntValue());
+	
+	saveSettings();
 }
 
 void MainComponent::loadSettings()
@@ -358,64 +342,93 @@ void MainComponent::loadSettings()
 
 	if (appSettings.getUserSettings()->getBoolValue("loadSettingsFile"))
 	{
-		//// osc
-		//clientTxIpLabel.setText(appSettings.getUserSettings()->getValue("clientTxIp"), dontSendNotification);
-		//clientTxPortLabel.setText(appSettings.getUserSettings()->getValue("clientTxPort"), dontSendNotification);
-		//clientRxPortLabel.setText(appSettings.getUserSettings()->getValue("clientRxPort"), dontSendNotification);
-
-		//// localisation component
-		//m_localisationComponent.setAudioFilesDir(appSettings.getUserSettings()->getValue("locCompAudioFilesDir"));
-
-		//// stimulus player
-		//m_stimulusPlayer.setAudioFilesDir(appSettings.getUserSettings()->getValue("stimPlayerAudioFilesDir"));
-
-		//// renderer view
-		//m_rendererView.setCurrentTab(appSettings.getUserSettings()->getValue("rendererViewTabIndex"));
-
-		//// router
-		//m_lspkRouter.loadRoutingFile(appSettings.getUserSettings()->getValue("routingFile"));
-		//m_lspkRouter.loadCalibrationFile(appSettings.getUserSettings()->getValue("calibrationFile"));
+		m_rollOscActive.setToggleState(appSettings.getUserSettings()->getBoolValue("rollOscActive"), dontSendNotification);
+		m_pitchOscActive.setToggleState(appSettings.getUserSettings()->getBoolValue("pitchOscActive"), dontSendNotification);
+		m_yawOscActive.setToggleState(appSettings.getUserSettings()->getBoolValue("yawOscActive"), dontSendNotification);
+		m_rpyOscActive.setToggleState(appSettings.getUserSettings()->getBoolValue("rpyOscActive"), dontSendNotification);
+		m_rollOscAddress.setText(appSettings.getUserSettings()->getValue("rollOscAddress"), dontSendNotification);
+		m_pitchOscAddress.setText(appSettings.getUserSettings()->getValue("pitchOscAddress"), dontSendNotification);
+		m_yawOscAddress.setText(appSettings.getUserSettings()->getValue("yawOscAddress"), dontSendNotification);
+		m_rpyOscAddress.setText(appSettings.getUserSettings()->getValue("rpyOscAddress"), dontSendNotification);
+		m_rollOscMin.setText(appSettings.getUserSettings()->getValue("rollOscMin"), dontSendNotification);
+		m_pitchOscMin.setText(appSettings.getUserSettings()->getValue("pitchOscMin"), dontSendNotification);
+		m_yawOscMin.setText(appSettings.getUserSettings()->getValue("yawOscMin"), dontSendNotification);
+		m_rollOscMax.setText(appSettings.getUserSettings()->getValue("rollOscMax"), dontSendNotification);
+		m_pitchOscMax.setText(appSettings.getUserSettings()->getValue("pitchOscMax"), dontSendNotification);
+		m_yawOscMax.setText(appSettings.getUserSettings()->getValue("yawOscMax"), dontSendNotification);
+		m_yprOrderCB.setSelectedId(appSettings.getUserSettings()->getIntValue("yprOrderCB"), dontSendNotification);
+		m_ipAddress.setText(appSettings.getUserSettings()->getValue("ipAddress"), dontSendNotification);
+		m_portNumber.setText(appSettings.getUserSettings()->getValue("portNumber"), dontSendNotification);
+		updateBridgeSettings();
 	}
-
-	m_rollOscAddress.setText("/roll/", dontSendNotification);
-	m_pitchOscAddress.setText("/pitch/", dontSendNotification);
-	m_yawOscAddress.setText("/yaw/", dontSendNotification);
-	m_rpyOscAddress.setText("/rendering/ypr/", dontSendNotification);
-
-	m_rollOscMin.setText("180", dontSendNotification);
-	m_pitchOscMin.setText("180", dontSendNotification);
-	m_yawOscMin.setText("180", dontSendNotification);
-
-	m_rollOscMax.setText("-180", dontSendNotification);
-	m_pitchOscMax.setText("-180", dontSendNotification);
-	m_yawOscMax.setText("-180", dontSendNotification);
-
-	m_ipAddress.setText("127.0.0.1", dontSendNotification);
-	m_portNumber.setText("9001", dontSendNotification);
-	
-	updateBridgeSettings();
+	else
+	{
+		m_ipAddress.setText("127.0.0.1", dontSendNotification); // ip address is not stored with presets
+		loadPreset(1);
+	}
 }
 
 void MainComponent::saveSettings()
 {
-
-	//// osc
-	//appSettings.getUserSettings()->setValue("clientTxIp", clientTxIpLabel.getText());
-	//appSettings.getUserSettings()->setValue("clientTxPort", clientTxPortLabel.getText());
-	//appSettings.getUserSettings()->setValue("clientRxPort", clientRxPortLabel.getText());
-
-	//// localisation component
-	//appSettings.getUserSettings()->setValue("locCompAudioFilesDir", m_localisationComponent.getAudioFilesDir());
-
-	//// stimulus player
-	//appSettings.getUserSettings()->setValue("stimPlayerAudioFilesDir", m_stimulusPlayer.getAudioFilesDir());
-
-	//// renderer view
-	//appSettings.getUserSettings()->setValue("rendererViewTabIndex", m_rendererView.getCurrentTab());
-
-	//// output router
-	//appSettings.getUserSettings()->setValue("routingFile", m_lspkRouter.getRoutingFilePath());
-	//appSettings.getUserSettings()->setValue("calibrationFile", m_lspkRouter.getCalibrationFilePath());
-
+	appSettings.getUserSettings()->setValue("rollOscActive", m_rollOscActive.getToggleState());
+	appSettings.getUserSettings()->setValue("pitchOscActive", m_pitchOscActive.getToggleState());
+	appSettings.getUserSettings()->setValue("yawOscActive", m_yawOscActive.getToggleState());
+	appSettings.getUserSettings()->setValue("rpyOscActive", m_rpyOscActive.getToggleState());
+	appSettings.getUserSettings()->setValue("rollOscAddress", m_rollOscAddress.getText());
+	appSettings.getUserSettings()->setValue("pitchOscAddress", m_pitchOscAddress.getText());
+	appSettings.getUserSettings()->setValue("yawOscAddress", m_yawOscAddress.getText());
+	appSettings.getUserSettings()->setValue("rpyOscAddress", m_rpyOscAddress.getText());
+	appSettings.getUserSettings()->setValue("rollOscMin", m_rollOscMin.getText());
+	appSettings.getUserSettings()->setValue("pitchOscMin", m_pitchOscMin.getText());
+	appSettings.getUserSettings()->setValue("yawOscMin", m_yawOscMin.getText());
+	appSettings.getUserSettings()->setValue("rollOscMax", m_rollOscMax.getText());
+	appSettings.getUserSettings()->setValue("pitchOscMax", m_pitchOscMax.getText());
+	appSettings.getUserSettings()->setValue("yawOscMax", m_yawOscMax.getText());
+	appSettings.getUserSettings()->setValue("yprOrderCB", m_yprOrderCB.getSelectedId());
+	appSettings.getUserSettings()->setValue("ipAddress", m_ipAddress.getText());
+	appSettings.getUserSettings()->setValue("portNumber", m_portNumber.getText());
 	appSettings.getUserSettings()->setValue("loadSettingsFile", true);
+}
+
+void MainComponent::loadPreset(int id)
+{
+	if (id == 1) // default - reaper/ambix rotator
+	{
+		m_rollOscActive.setToggleState(true, dontSendNotification);
+		m_pitchOscActive.setToggleState(true, dontSendNotification);
+		m_yawOscActive.setToggleState(true, dontSendNotification);
+		m_rpyOscActive.setToggleState(false, dontSendNotification);
+		m_rollOscAddress.setText("/roll/", dontSendNotification);
+		m_pitchOscAddress.setText("/pitch/", dontSendNotification);
+		m_yawOscAddress.setText("/yaw/", dontSendNotification);
+		m_rpyOscAddress.setText("/rpy/", dontSendNotification);
+		m_rollOscMin.setText("0", dontSendNotification);
+		m_pitchOscMin.setText("1", dontSendNotification);
+		m_yawOscMin.setText("1", dontSendNotification);
+		m_rollOscMax.setText("1", dontSendNotification);
+		m_pitchOscMax.setText("0", dontSendNotification);
+		m_yawOscMax.setText("0", dontSendNotification);
+		m_yprOrderCB.setSelectedId(1, dontSendNotification);
+		m_portNumber.setText("9001", dontSendNotification);
+	}
+	else if (id == 2) // salte
+	{
+		m_rollOscActive.setToggleState(false, dontSendNotification);
+		m_pitchOscActive.setToggleState(false, dontSendNotification);
+		m_yawOscActive.setToggleState(false, dontSendNotification);
+		m_rpyOscActive.setToggleState(true, dontSendNotification);
+		m_rollOscAddress.setText("/roll/", dontSendNotification);
+		m_pitchOscAddress.setText("/pitch/", dontSendNotification);
+		m_yawOscAddress.setText("/yaw/", dontSendNotification);
+		m_rpyOscAddress.setText("/rendering/htrpy/", dontSendNotification);
+		m_rollOscMin.setText("-180", dontSendNotification);
+		m_pitchOscMin.setText("-180", dontSendNotification);
+		m_yawOscMin.setText("-180", dontSendNotification);
+		m_rollOscMax.setText("180", dontSendNotification);
+		m_pitchOscMax.setText("180", dontSendNotification);
+		m_yawOscMax.setText("180", dontSendNotification);
+		m_yprOrderCB.setSelectedId(1, dontSendNotification);
+		m_portNumber.setText("9000", dontSendNotification);
+	}
+	updateBridgeSettings();
 }

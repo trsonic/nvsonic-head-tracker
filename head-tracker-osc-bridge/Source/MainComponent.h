@@ -28,7 +28,6 @@
 
 class MainComponent   : public Component,
 						public Button::Listener,
-						public ComboBox::Listener,
 						private Timer
 {
 public:
@@ -37,7 +36,6 @@ public:
 
 	SMLookAndFeel SMLF;
 
-	void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
 	void buttonClicked(Button* buttonThatWasClicked) override;
 	void timerCallback() override;
     void paint (Graphics&) override;
@@ -48,10 +46,11 @@ private:
 	void updateBridgeSettings();
 	void loadSettings();
 	void saveSettings();
+	void loadPreset(int index);
 	ApplicationProperties appSettings;
 
 	TextButton m_refreshButton, m_connectButton, m_resetButton;
-	TextButton m_rollOscMute, m_pitchOscMute, m_yawOscMute, m_rpyOscMute;
+	TextButton m_rollOscActive, m_pitchOscActive, m_yawOscActive, m_rpyOscActive;
 	ComboBox m_portlistCB, m_yprOrderCB, m_oscPresetCB;
 	Label m_rollLabel, m_pitchLabel, m_yawLabel;
 

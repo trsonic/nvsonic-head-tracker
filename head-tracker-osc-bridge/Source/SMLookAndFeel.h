@@ -116,33 +116,33 @@ public:
 		g.fillPath(p);
 	}
 
-	//void drawLabel(Graphics& g, Label& label)
-	//{
-	//	//g.fillAll(label.findColour(Label::backgroundColourId));
+	void drawLabel(Graphics& g, Label& label) override
+	{
+		//g.fillAll(label.findColour(Label::backgroundColourId));
+		g.setColour(label.findColour(Label::backgroundColourId));
+		g.fillRoundedRectangle(label.getLocalBounds().toFloat(), 3.0f);
 
-	//	//if (!label.isBeingEdited())
-	//	//{
-	//	//	auto alpha = label.isEnabled() ? 1.0f : 0.5f;
-	//	//	const Font font(getLabelFont(label));
+		if (!label.isBeingEdited())
+		{
+			auto alpha = label.isEnabled() ? 1.0f : 0.5f;
+			const Font font(getLabelFont(label));
 
-	//	//	g.setColour(cdark);
-	//	//	g.setFont(font);
+			g.setColour(label.findColour(Label::textColourId).withMultipliedAlpha(alpha));
+			g.setFont(font);
 
-	//	//	auto textArea = getLabelBorderSize(label).subtractedFrom(label.getLocalBounds());
+			auto textArea = getLabelBorderSize(label).subtractedFrom(label.getLocalBounds());
 
-	//	//	g.drawFittedText(label.getText(), textArea, label.getJustificationType(),
-	//	//		jmax(1, (int)(textArea.getHeight() / font.getHeight())),
-	//	//		label.getMinimumHorizontalScale());
+			g.drawFittedText(label.getText(), textArea, label.getJustificationType(),
+				jmax(1, (int)(textArea.getHeight() / font.getHeight())),
+				label.getMinimumHorizontalScale());
 
-	//	//	g.setColour(label.findColour(Label::outlineColourId).withMultipliedAlpha(alpha));
-	//	//}
-	//	//else if (label.isEnabled())
-	//	//{
-	//	//	g.setColour(label.findColour(Label::outlineColourId));
-	//	//}
+			g.setColour(label.findColour(Label::outlineColourId).withMultipliedAlpha(alpha));
+		}
+		else if (label.isEnabled())
+		{
+			g.setColour(label.findColour(Label::outlineColourId));
+		}
 
-	//	g.setColour(cdark.brighter());
-	//	g.fillRoundedRectangle(label.getLocalBounds().toFloat(), 3.0f);
-	//	// g.drawRect(label.getLocalBounds());
-	//}
+		//g.drawRect(label.getLocalBounds());
+	}
 };

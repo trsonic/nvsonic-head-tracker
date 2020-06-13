@@ -120,9 +120,39 @@ void Bridge::timerCallback()
                 m_rollOSC     = (float) jmap(m_roll, (float) -180, (float) 180, m_rollOscMin, m_rollOscMax);
                 m_pitchOSC    = (float) jmap(m_pitch, (float) -180, (float) 180, m_pitchOscMin, m_pitchOscMax);
                 m_yawOSC      = (float) jmap(m_yaw, (float) -180, (float) 180, m_yawOscMin, m_yawOscMax);
-                if (!m_rollMuted) sender.send (m_rollOscAddress, (float) m_rollOSC);
-                if (!m_pitchMuted) sender.send (m_pitchOscAddress, (float) m_pitchOSC);
-                if (!m_yawMuted) sender.send (m_yawOscAddress, (float) m_yawOSC);
+                if (m_rollActive) sender.send(m_rollOscAddress, m_rollOSC);
+                if (m_pitchActive) sender.send(m_pitchOscAddress, m_pitchOSC);
+                if (m_yawActive) sender.send(m_yawOscAddress, m_yawOSC);
+
+                if (m_rpyActive)
+                {
+                    float msg1, msg2, msg3;
+                    if (m_rpyOscKey == "rpy")
+                    {
+                        msg1 = m_rollOSC; msg2 = m_pitchOSC; msg3 = m_yawOSC;
+                    }
+                    else if (m_rpyOscKey == "ypr")
+                    {
+                        msg1 = m_yawOSC; msg2 = m_pitchOSC; msg3 = m_rollOSC;
+                    }
+                    else if (m_rpyOscKey == "pry")
+                    {
+                        msg1 = m_pitchOSC; msg2 = m_rollOSC; msg3 = m_yawOSC;
+                    }
+                    else if (m_rpyOscKey == "yrp")
+                    {
+                        msg1 = m_yawOSC; msg2 = m_rollOSC; msg3 = m_pitchOSC;
+                    }
+                    else if (m_rpyOscKey == "ryp")
+                    {
+                        msg1 = m_rollOSC; msg2 = m_yawOSC; msg3 = m_pitchOSC;
+                    }
+                    else if (m_rpyOscKey == "pyr")
+                    {
+                        msg1 = m_pitchOSC; msg2 = m_yawOSC; msg3 = m_rollOSC;
+                    }
+                    sender.send(m_rpyOscAddress, msg1, msg2, msg3);
+                }
 				
 				// send rpy
 				// sender2.send("/rendering/htrpy", RollOUT, PitchOUT, YawOUT);
@@ -172,29 +202,44 @@ float Bridge::getYawOSC()
     return m_yawOSC;
 }
 
-void Bridge::setupRollOSC(String address, float min, float max)
+void Bridge::setupRollOSC(bool isActive, String address, float min, float max)
 {
+    m_rollActive = isActive;
     m_rollOscAddress = address;
     m_rollOscMin = min;
     m_rollOscMax = max;
 }
 
-void Bridge::setupPitchOSC(String address, float min, float max)
+void Bridge::setupPitchOSC(bool isActive, String address, float min, float max)
 {
+    m_pitchActive = isActive;
     m_pitchOscAddress = address;
     m_pitchOscMin = min;
     m_pitchOscMax = max;
 }
 
-void Bridge::setupYawOSC(String address, float min, float max)
+void Bridge::setupYawOSC(bool isActive, String address, float min, float max)
 {
+    m_yawActive = isActive;
     m_yawOscAddress = address;
     m_yawOscMin = min;
     m_yawOscMax = max;
 }
 
+void Bridge::setupRpyOSC(bool isActive, String address, String key)
+{
+    m_rpyActive = isActive;
+    m_rpyOscAddress = address;
+    m_rpyOscKey = key;
+}
+
 void Bridge::setupIp(String address, int port)
 {
-    m_ipAddress = address;
-    m_oscPortNumber = port;
+    if (m_ipAddress != address || m_oscPortNumber != port)
+    {
+        m_ipAddress = address;
+        m_oscPortNumber = port;
+        sender.disconnect();
+        sender.connect(m_ipAddress, m_oscPortNumber);
+    }
 }
