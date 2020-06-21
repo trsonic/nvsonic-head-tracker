@@ -44,17 +44,20 @@ public:
 private:
 	void refreshPortList();
 	void updateBridgeSettings();
+	bool validateQuatsKey();
 	void loadSettings();
 	void saveSettings();
 	void loadPreset(int index);
 	ApplicationProperties appSettings;
 
 	TextButton m_refreshButton, m_connectButton, m_resetButton;
-	TextButton m_rollOscActive, m_pitchOscActive, m_yawOscActive, m_rpyOscActive;
-	ComboBox m_portlistCB, m_yprOrderCB, m_oscPresetCB;
+	TextButton m_quatsOscActive, m_rollOscActive, m_pitchOscActive, m_yawOscActive, m_rpyOscActive;
+	ComboBox m_portListCB, m_yprOrderCB, m_oscPresetCB;
 	Label m_rollLabel, m_pitchLabel, m_yawLabel;
+	Label m_quatsKeyLabel;
+	Array<int> m_quatsOrder, m_quatsSigns;
 
-	Label m_rollOscAddress, m_pitchOscAddress, m_yawOscAddress, m_rpyOscAddress;
+	Label m_quatsOscAddress, m_rollOscAddress, m_pitchOscAddress, m_yawOscAddress, m_rpyOscAddress;
 	Label m_rollOscMin, m_pitchOscMin, m_yawOscMin;
 	Label m_rollOscMax, m_pitchOscMax, m_yawOscMax;
 	Label m_rollOscVal, m_pitchOscVal, m_yawOscVal;

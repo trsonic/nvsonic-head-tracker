@@ -95,70 +95,38 @@ void Bridge::timerCallback()
                 qX = qbW * qlX - qbX * qlW - qbY * qlZ + qbZ * qlY;
                 qY = qbW * qlY + qbX * qlZ - qbY * qlW - qbZ * qlX;
                 qZ = qbW * qlZ - qbX * qlY + qbY * qlX - qbZ * qlW;
+                
+                if (m_quatsActive)
+                {
+                    const Array<float> quats = {qW, qX, qY, qZ};
+                    if (m_quatsOrder.size() == 4 && m_quatsSigns.size() == 4)
+                    {
+                        sender.send(m_quatsOscAddress,
+                            m_quatsSigns[0] * quats[m_quatsOrder[0]],
+                            m_quatsSigns[1] * quats[m_quatsOrder[1]],
+                            m_quatsSigns[2] * quats[m_quatsOrder[2]],
+                            m_quatsSigns[3] * quats[m_quatsOrder[3]]);
+                    }
+                }
 
-                // roll (y-axis rotation)
-                double sinp = +2.0 * (qW * qY - qZ * qX);
-                if (fabs(sinp) >= 1)
-                    m_roll = (float) copysign(double_Pi / 2, sinp) * (180 / double_Pi); // use 90 degrees if out of range
-                else
-                    m_roll = (float) asin(sinp) * (180 / double_Pi);
+                updateEuler();
 
-                // pitch (x-axis rotation)
-                double sinr_cosp = +2.0 * (qW * qX + qY * qZ);
-                double cosr_cosp = +1.0 - 2.0 * (qX * qX + qY * qY);
-                m_pitch = (float) atan2(sinr_cosp, cosr_cosp)  * (180 / double_Pi);
-
-                // yaw (z-axis rotation)
-                double siny_cosp = +2.0 * (qW * qZ + qX * qY);
-                double cosy_cosp = +1.0 - 2.0 * (qY * qY + qZ * qZ);
-                m_yaw = (float) atan2(siny_cosp, cosy_cosp)  * (180 / double_Pi) * -1;
-
-                // console output
-                // DBG("Roll: " + String(m_roll) + ", Pitch: " + String(m_pitch) + ", Yaw: " + String(m_yaw));
-
-                // Map and send OSC
+                // Map and send rpy OSC
                 m_rollOSC     = (float) jmap(m_roll, (float) -180, (float) 180, m_rollOscMin, m_rollOscMax);
                 m_pitchOSC    = (float) jmap(m_pitch, (float) -180, (float) 180, m_pitchOscMin, m_pitchOscMax);
                 m_yawOSC      = (float) jmap(m_yaw, (float) -180, (float) 180, m_yawOscMin, m_yawOscMax);
                 if (m_rollActive) sender.send(m_rollOscAddress, m_rollOSC);
                 if (m_pitchActive) sender.send(m_pitchOscAddress, m_pitchOSC);
                 if (m_yawActive) sender.send(m_yawOscAddress, m_yawOSC);
-
                 if (m_rpyActive)
                 {
-                    float msg1, msg2, msg3;
-                    if (m_rpyOscKey == "rpy")
-                    {
-                        msg1 = m_rollOSC; msg2 = m_pitchOSC; msg3 = m_yawOSC;
-                    }
-                    else if (m_rpyOscKey == "ypr")
-                    {
-                        msg1 = m_yawOSC; msg2 = m_pitchOSC; msg3 = m_rollOSC;
-                    }
-                    else if (m_rpyOscKey == "pry")
-                    {
-                        msg1 = m_pitchOSC; msg2 = m_rollOSC; msg3 = m_yawOSC;
-                    }
-                    else if (m_rpyOscKey == "yrp")
-                    {
-                        msg1 = m_yawOSC; msg2 = m_rollOSC; msg3 = m_pitchOSC;
-                    }
-                    else if (m_rpyOscKey == "ryp")
-                    {
-                        msg1 = m_rollOSC; msg2 = m_yawOSC; msg3 = m_pitchOSC;
-                    }
-                    else if (m_rpyOscKey == "pyr")
-                    {
-                        msg1 = m_pitchOSC; msg2 = m_yawOSC; msg3 = m_rollOSC;
-                    }
-                    sender.send(m_rpyOscAddress, msg1, msg2, msg3);
+					if (m_rpyOscKey == "rpy") sender.send(m_rpyOscAddress, m_rollOSC, m_pitchOSC, m_yawOSC);
+					else if (m_rpyOscKey == "ypr") sender.send(m_rpyOscAddress, m_yawOSC, m_pitchOSC, m_rollOSC);
+					else if (m_rpyOscKey == "pry") sender.send(m_rpyOscAddress, m_pitchOSC, m_rollOSC, m_yawOSC);
+					else if (m_rpyOscKey == "yrp") sender.send(m_rpyOscAddress, m_yawOSC, m_rollOSC, m_pitchOSC);
+					else if (m_rpyOscKey == "ryp") sender.send(m_rpyOscAddress, m_rollOSC, m_yawOSC, m_pitchOSC);
+					else if (m_rpyOscKey == "pyr") sender.send(m_rpyOscAddress, m_pitchOSC, m_yawOSC, m_rollOSC);
                 }
-				
-				// send rpy
-				// sender2.send("/rendering/htrpy", RollOUT, PitchOUT, YawOUT);
-
-				// send quaternions
-				//sender.send("/rendering/quaternions/", qW, qX, qY, qZ);
             }
         }
 	}
@@ -170,6 +138,29 @@ void Bridge::resetOrientation()
 	qbX = qlX;
 	qbY = qlY;
 	qbZ = qlZ;
+}
+
+void Bridge::updateEuler()
+{
+	// roll (y-axis rotation)
+	double sinp = +2.0 * (qW * qY - qZ * qX);
+	if (fabs(sinp) >= 1)
+		m_roll = (float)copysign(double_Pi / 2, sinp) * (180 / double_Pi);
+	else
+		m_roll = (float)asin(sinp) * (180 / double_Pi);
+
+	// pitch (x-axis rotation)
+	double sinr_cosp = +2.0 * (qW * qX + qY * qZ);
+	double cosr_cosp = +1.0 - 2.0 * (qX * qX + qY * qY);
+	m_pitch = (float)atan2(sinr_cosp, cosr_cosp) * (180 / double_Pi);
+
+	// yaw (z-axis rotation)
+	double siny_cosp = +2.0 * (qW * qZ + qX * qY);
+	double cosy_cosp = +1.0 - 2.0 * (qY * qY + qZ * qZ);
+	m_yaw = (float)atan2(siny_cosp, cosy_cosp) * (180 / double_Pi);
+
+    m_yaw *= -1.0f;
+    if (m_pitch < -90.0f || m_pitch > 90.0f) m_roll *= -1.0f;
 }
 
 float Bridge::getRoll()
@@ -200,6 +191,14 @@ float Bridge::getPitchOSC()
 float Bridge::getYawOSC()
 {
     return m_yawOSC;
+}
+
+void Bridge::setupQuatsOSC(bool isActive, String address, Array<int> order, Array<int> signs)
+{
+    m_quatsActive = isActive;
+    m_quatsOscAddress = address;
+    m_quatsOrder = order;
+    m_quatsSigns = signs;
 }
 
 void Bridge::setupRollOSC(bool isActive, String address, float min, float max)

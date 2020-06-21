@@ -39,6 +39,7 @@ public:
 	bool isConnected();
 	void timerCallback() override;
 	void resetOrientation();
+	void updateEuler();
 
 	float getRoll();
 	float getPitch();
@@ -47,6 +48,7 @@ public:
 	float getPitchOSC();
 	float getYawOSC();
 
+	void setupQuatsOSC(bool isActive, String address, Array<int> order, Array<int> signs);
 	void setupRollOSC(bool isActive, String address, float min, float max);
 	void setupPitchOSC(bool isActive, String address, float min, float max);
 	void setupYawOSC(bool isActive, String address, float min, float max);
@@ -65,17 +67,18 @@ private:
 	float qbW = 1, qbX = 0, qbY = 0, qbZ = 0;
 
 	float m_roll, m_pitch, m_yaw;
+	bool m_quatsActive, m_rollActive, m_pitchActive, m_yawActive, m_rpyActive;
+	String m_quatsOscAddress;
+	Array<int> m_quatsOrder, m_quatsSigns;
+	String m_rollOscAddress, m_pitchOscAddress, m_yawOscAddress;
 	float m_rollOscMin, m_pitchOscMin, m_yawOscMin;
 	float m_rollOscMax, m_pitchOscMax, m_yawOscMax;
-	String m_rollOscAddress, m_pitchOscAddress, m_yawOscAddress, m_rpyOscAddress, m_rpyOscKey;
+	String m_rpyOscAddress, m_rpyOscKey;
 	float m_rollOSC, m_pitchOSC, m_yawOSC;
 
-	bool m_rollActive, m_pitchActive, m_yawActive, m_rpyActive;
 	bool m_connected = false;
-
-	String m_ipAddress = "127.0.0.1";
-	int m_oscPortNumber = 9001;
-
+	String m_ipAddress;
+	int m_oscPortNumber;
 	OSCSender sender;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Bridge)
