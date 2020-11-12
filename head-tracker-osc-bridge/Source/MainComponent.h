@@ -25,6 +25,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Bridge.h"
 #include "SMLookAndFeel.h"
+#include "BinauralHeadView.h"
 
 class MainComponent   : public Component,
 						public Button::Listener,
@@ -82,6 +83,9 @@ private:
 	Image iserial = ImageCache::getFromMemory(BinaryData::serial_png, BinaryData::serial_pngSize);
 	Image iaxis = ImageCache::getFromMemory(BinaryData::axis_png, BinaryData::axis_pngSize);
 	Image iosc = ImageCache::getFromMemory(BinaryData::osc_png, BinaryData::osc_pngSize);
+	
+	BinauralHeadView m_binauralHeadView;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

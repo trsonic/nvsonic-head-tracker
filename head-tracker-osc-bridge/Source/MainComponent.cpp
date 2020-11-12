@@ -156,6 +156,9 @@ MainComponent::MainComponent()
 		addAndMakeVisible(oscLabels[i]);
 	}
 
+	// 3d head
+	addAndMakeVisible(m_binauralHeadView);
+
 	loadSettings();
 	startTimerHz(20);
 	setSize(300, 620);
@@ -227,6 +230,8 @@ void MainComponent::resized()
 	m_rollLabel.setBounds(70, 240, 65, 20);
 	m_pitchLabel.setBounds(70, 260, 65, 20);
 	m_yawLabel.setBounds(70, 280, 65, 20);
+
+	m_binauralHeadView.setBounds(220, 180, 50, 50);
 
 	m_quatsOscActive.setBounds(10, 370, 25, 25);
 	m_rollOscActive.setBounds(10, 400, 25, 25);
@@ -302,6 +307,8 @@ void MainComponent::timerCallback()
 		m_rollOscVal.setText(String(bridge.getRollOSC(), 2), dontSendNotification);
 		m_pitchOscVal.setText(String(bridge.getPitchOSC(), 2), dontSendNotification);
 		m_yawOscVal.setText(String(bridge.getYawOSC(), 2), dontSendNotification);
+
+		m_binauralHeadView.setHeadOrientation(bridge.getRoll(), bridge.getPitch(), bridge.getYaw());
 	}
 	else
 	{

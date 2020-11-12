@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="bHyyaC" name="Head Tracker OSC Bridge" projectType="guiapp"
-              jucerVersion="5.4.7" companyName="nvsonic" companyWebsite="nvsonic.io"
-              companyEmail="tom@nvsonic.io" version="2.0">
+              version="3.0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="RLPzK0" name="Head Tracker OSC Bridge">
     <GROUP id="{248FD7E1-7B63-4263-1B25-0B52845722A6}" name="Resources">
+      <FILE id="jduIvz" name="male_head.obj" compile="0" resource="1" file="Resources/male_head.obj"/>
       <FILE id="iIxZGp" name="axis.png" compile="0" resource="1" file="Resources/axis.png"/>
       <FILE id="qgT7ID" name="osc.png" compile="0" resource="1" file="Resources/osc.png"/>
       <FILE id="IcDUYJ" name="serial.png" compile="0" resource="1" file="Resources/serial.png"/>
@@ -12,6 +12,12 @@
       <FILE id="WBtIGS" name="segoeui.ttf" compile="0" resource="1" file="Resources/segoeui.ttf"/>
     </GROUP>
     <GROUP id="{9783C7C5-4DA9-4B10-A938-212BA5B89C4A}" name="Source">
+      <FILE id="wwjTra" name="BinauralHeadView.cpp" compile="1" resource="0"
+            file="Source/BinauralHeadView.cpp"/>
+      <FILE id="pDe52x" name="BinauralHeadView.h" compile="0" resource="0"
+            file="Source/BinauralHeadView.h"/>
+      <FILE id="fgrGdn" name="WavefrontObjParser.h" compile="0" resource="0"
+            file="Source/WavefrontObjParser.h"/>
       <FILE id="C4vanh" name="SMLookAndFeel.h" compile="1" resource="0" file="Source/SMLookAndFeel.h"/>
       <FILE id="N1i1TQ" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="Yez5io" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
