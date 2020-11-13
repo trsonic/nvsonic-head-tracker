@@ -49,6 +49,7 @@ private:
 	void loadSettings();
 	void saveSettings();
 	void loadPreset(int index);
+	void loadPresetXml();
 	ApplicationProperties appSettings;
 
 	TextButton m_refreshButton, m_connectButton, m_resetButton;
@@ -85,6 +86,8 @@ private:
 	Image iosc = ImageCache::getFromMemory(BinaryData::osc_png, BinaryData::osc_pngSize);
 	
 	BinauralHeadView m_binauralHeadView;
+
+	std::unique_ptr<juce::XmlElement> presetList;
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

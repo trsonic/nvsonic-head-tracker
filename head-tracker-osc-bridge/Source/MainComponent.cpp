@@ -101,9 +101,16 @@ MainComponent::MainComponent()
 	m_yprOrderCB.onChange = [this] { updateBridgeSettings(); };
 	addAndMakeVisible(m_yprOrderCB);
 
+	// presets
+	loadPresetXml();
+
 	m_oscPresetCB.setEditableText(false);
 	m_oscPresetCB.setJustificationType(Justification::centred);
-	StringArray presets = {"Ambix Rotator - inversed", "Ambix Rotator", "IEM Scene Rotator - inversed", "Unity", "Ambi Head HD"};
+	StringArray presets;
+	for (int id = 1; id <= presetList->getNumChildElements(); ++id)
+	{
+		presets.add(presetList->getChildByAttribute("ID", String(id))->getStringAttribute("name"));
+	}
 	m_oscPresetCB.addItemList(presets, 1);
 	m_oscPresetCB.setTextWhenNothingSelected(String("select preset"));
 	m_oscPresetCB.setLookAndFeel(&SMLF);
@@ -200,9 +207,6 @@ void MainComponent::paint (Graphics& g)
 	g.drawText("OSC Configuration", oscLabelArea.removeFromRight(270), Justification::left);
 
 	g.drawImageAt(iserial, 210, 52);
-	//g.drawImageAt(iaxis, 225, 185);
-	//g.drawImageAt(iosc, 220, 310);
-
 
 	// other texts
 	g.setFont(titlefontB.withPointHeight(14));
@@ -462,71 +466,69 @@ void MainComponent::saveSettings()
 
 void MainComponent::loadPreset(int id)
 {
-	if (id == 1) // Ambix Rotator - inversed
+	if (id <= presetList->getNumChildElements())
 	{
-		m_quatsOscActive.setToggleState(true, dontSendNotification);
-		m_rollOscActive.setToggleState(false, dontSendNotification);
-		m_pitchOscActive.setToggleState(false, dontSendNotification);
-		m_yawOscActive.setToggleState(false, dontSendNotification);
-		m_rpyOscActive.setToggleState(false, dontSendNotification);
+		XmlElement* preset = presetList->getChildByAttribute("ID", String(id));
 
-		m_quatsOscAddress.setText("/quaternion", dontSendNotification);
-		m_quatsKeyLabel.setText("qW, -qY, qX, -qZ", dontSendNotification);
-		m_portNumber.setText("7120", dontSendNotification);
-	}
-	else if (id == 2) // Ambix Rotator
-	{
-		m_quatsOscActive.setToggleState(true, dontSendNotification);
-		m_rollOscActive.setToggleState(false, dontSendNotification);
-		m_pitchOscActive.setToggleState(false, dontSendNotification);
-		m_yawOscActive.setToggleState(false, dontSendNotification);
-		m_rpyOscActive.setToggleState(false, dontSendNotification);
-
-		m_quatsOscAddress.setText("/quaternion", dontSendNotification);
-		m_quatsKeyLabel.setText("qW, qY, -qX, qZ", dontSendNotification);
-		m_portNumber.setText("7120", dontSendNotification);
-	}
-	if (id == 3) // IEM Scene Rotator - inversed
-	{
-		m_quatsOscActive.setToggleState(true, dontSendNotification);
-		m_rollOscActive.setToggleState(false, dontSendNotification);
-		m_pitchOscActive.setToggleState(false, dontSendNotification);
-		m_yawOscActive.setToggleState(false, dontSendNotification);
-		m_rpyOscActive.setToggleState(false, dontSendNotification);
-
-		m_quatsOscAddress.setText("/SceneRotator/quaternions", dontSendNotification);
-		m_quatsKeyLabel.setText("qW, -qY, qX, -qZ", dontSendNotification);
-	}
-	else if (id == 4) // Unity
-	{
-		m_quatsOscActive.setToggleState(true, dontSendNotification);
-		m_rollOscActive.setToggleState(false, dontSendNotification);
-		m_pitchOscActive.setToggleState(false, dontSendNotification);
-		m_yawOscActive.setToggleState(false, dontSendNotification);
-		m_rpyOscActive.setToggleState(false, dontSendNotification);
-
-		m_quatsOscAddress.setText("/quaternions", dontSendNotification);
-		m_quatsKeyLabel.setText("qW, -qX, -qZ, -qY", dontSendNotification);
-	}
-	else if (id == 5) // Ambi Head HD
-	{
-		m_quatsOscActive.setToggleState(false, dontSendNotification);
-		m_rollOscActive.setToggleState(true, dontSendNotification);
-		m_pitchOscActive.setToggleState(true, dontSendNotification);
-		m_yawOscActive.setToggleState(true, dontSendNotification);
-		m_rpyOscActive.setToggleState(false, dontSendNotification);
-
-		m_rollOscAddress.setText("/roll", dontSendNotification);
-		m_pitchOscAddress.setText("/pitch", dontSendNotification);
-		m_yawOscAddress.setText("/yaw", dontSendNotification);
-		m_rollOscMin.setText("1", dontSendNotification);
-		m_pitchOscMin.setText("0", dontSendNotification);
-		m_yawOscMin.setText("1", dontSendNotification);
-		m_rollOscMax.setText("0", dontSendNotification);
-		m_pitchOscMax.setText("1", dontSendNotification);
-		m_yawOscMax.setText("0", dontSendNotification);
-		m_yprOrderCB.setSelectedId(1, dontSendNotification);
-		m_portNumber.setText("4040", dontSendNotification);
+		m_quatsOscActive.setToggleState(preset->getBoolAttribute("quatsOscActive"), dontSendNotification);
+		m_rollOscActive.setToggleState(preset->getBoolAttribute("rollOscActive"), dontSendNotification);
+		m_pitchOscActive.setToggleState(preset->getBoolAttribute("pitchOscActive"), dontSendNotification);
+		m_yawOscActive.setToggleState(preset->getBoolAttribute("yawOscActive"), dontSendNotification);
+		m_rpyOscActive.setToggleState(preset->getBoolAttribute("rpyOscActive"), dontSendNotification);
+		
+		if (preset->getStringAttribute("quatsOscAddress") != "")
+			m_quatsOscAddress.setText(preset->getStringAttribute("quatsOscAddress"), dontSendNotification);
+		if (preset->getStringAttribute("rollOscAddress") != "")
+			m_rollOscAddress.setText(preset->getStringAttribute("rollOscAddress"), dontSendNotification);
+		if (preset->getStringAttribute("pitchOscAddress") != "")
+			m_pitchOscAddress.setText(preset->getStringAttribute("pitchOscAddress"), dontSendNotification);
+		if (preset->getStringAttribute("yawOscAddress") != "")
+			m_yawOscAddress.setText(preset->getStringAttribute("yawOscAddress"), dontSendNotification);
+		if (preset->getStringAttribute("rpyOscAddress") != "")
+			m_rpyOscAddress.setText(preset->getStringAttribute("rpyOscAddress"), dontSendNotification);
+		if (preset->getStringAttribute("quatsKey") != "")
+			m_quatsKeyLabel.setText(preset->getStringAttribute("quatsKey"), dontSendNotification);
+		if (preset->getStringAttribute("yprOrderCB") != "")
+			m_yprOrderCB.setSelectedId(preset->getIntAttribute("yprOrderCB"), dontSendNotification);
+		if (preset->getStringAttribute("rollOscMin") != "")
+			m_rollOscMin.setText(preset->getStringAttribute("rollOscMin"), dontSendNotification);
+		if (preset->getStringAttribute("pitchOscMin") != "")
+			m_pitchOscMin.setText(preset->getStringAttribute("pitchOscMin"), dontSendNotification);
+		if (preset->getStringAttribute("yawOscMin") != "")
+			m_yawOscMin.setText(preset->getStringAttribute("yawOscMin"), dontSendNotification);
+		if (preset->getStringAttribute("rollOscMax") != "")
+			m_rollOscMax.setText(preset->getStringAttribute("rollOscMax"), dontSendNotification);
+		if (preset->getStringAttribute("pitchOscMax") != "")
+			m_pitchOscMax.setText(preset->getStringAttribute("pitchOscMax"), dontSendNotification);
+		if (preset->getStringAttribute("yawOscMax") != "")
+			m_yawOscMax.setText(preset->getStringAttribute("yawOscMax"), dontSendNotification);
+		if (preset->getStringAttribute("portNumber") != "")
+			m_portNumber.setText(preset->getStringAttribute("portNumber"), dontSendNotification);
 	}
 	updateBridgeSettings();
+}
+
+void MainComponent::loadPresetXml()
+{
+	auto dir = juce::File::getCurrentWorkingDirectory();
+
+	int numTries = 0;
+	File presetsFile;
+
+	if (dir.getChildFile("presets.xml").existsAsFile())
+	{
+		presetsFile = dir.getChildFile("Resources").getChildFile("presets.xml");
+	}
+	else
+	{
+		while (!dir.getChildFile("Resources").exists() && numTries++ < 15)
+			dir = dir.getParentDirectory();
+
+		presetsFile = dir.getChildFile("Resources").getChildFile("presets.xml");
+	}
+
+	if (presetsFile.exists())
+	{
+		presetList = juce::XmlDocument::parse(presetsFile);
+	}
 }
