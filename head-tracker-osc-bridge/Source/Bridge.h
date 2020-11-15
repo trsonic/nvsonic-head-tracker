@@ -61,10 +61,10 @@ private:
 
 	int port_number, port_index, port_state;
 	char readBuffer[128];
-	StringArray m_quatsReceived;
-	float qW, qX, qY, qZ;
-	float qlW, qlX, qlY, qlZ;
-	float qbW = 1, qbX = 0, qbY = 0, qbZ = 0;
+
+	double qW, qX, qY, qZ;
+	double qlW, qlX, qlY, qlZ;
+	double qbW = 1, qbX = 0, qbY = 0, qbZ = 0;
 
 	float m_roll, m_pitch, m_yaw;
 	bool m_quatsActive, m_rollActive, m_pitchActive, m_yawActive, m_rpyActive;

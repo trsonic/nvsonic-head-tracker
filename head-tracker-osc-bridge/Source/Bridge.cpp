@@ -82,14 +82,13 @@ void Bridge::timerCallback()
         
         if(strlen(readBuffer) != 0)
         {
-            m_quatsReceived = StringArray::fromTokens(readBuffer, ",", "\"");
+            StringArray m_quatsReceived = StringArray::fromTokens(readBuffer, ",", "\"");
             if(m_quatsReceived.size() == 4)
             {
                 qlW = m_quatsReceived[0].getFloatValue();
                 qlX = m_quatsReceived[1].getFloatValue();
                 qlY = m_quatsReceived[2].getFloatValue();
                 qlZ = m_quatsReceived[3].getFloatValue();
-                m_quatsReceived.clearQuick();
 
                 qW = qbW * qlW + qbX * qlX + qbY * qlY + qbZ * qlZ;
                 qX = qbW * qlX - qbX * qlW - qbY * qlZ + qbZ * qlY;
@@ -143,21 +142,21 @@ void Bridge::resetOrientation()
 void Bridge::updateEuler()
 {
 	// roll (y-axis rotation)
-	double sinp = +2.0 * (qW * qY - qZ * qX);
+	double sinp = +2.0 * ((double)qW * qY - (double)qZ * qX);
 	if (fabs(sinp) >= 1)
-		m_roll = (float)copysign(double_Pi / 2, sinp) * (180 / double_Pi);
+		m_roll = (float)copysign(MathConstants<double>::pi / 2, sinp) * (180 / MathConstants<double>::pi);
 	else
-		m_roll = (float)asin(sinp) * (180 / double_Pi);
+		m_roll = (float)asin(sinp) * (180 / MathConstants<double>::pi);
 
 	// pitch (x-axis rotation)
-	double sinr_cosp = +2.0 * (qW * qX + qY * qZ);
-	double cosr_cosp = +1.0 - 2.0 * (qX * qX + qY * qY);
-	m_pitch = (float)atan2(sinr_cosp, cosr_cosp) * (180 / double_Pi);
+	double sinr_cosp = +2.0 * ((double)qW * qX + (double)qY * qZ);
+	double cosr_cosp = +1.0 - 2.0 * ((double)qX * qX + (double)qY * qY);
+	m_pitch = (float)atan2(sinr_cosp, cosr_cosp) * (180 / MathConstants<double>::pi);
 
 	// yaw (z-axis rotation)
-	double siny_cosp = +2.0 * (qW * qZ + qX * qY);
-	double cosy_cosp = +1.0 - 2.0 * (qY * qY + qZ * qZ);
-	m_yaw = (float)atan2(siny_cosp, cosy_cosp) * (180 / double_Pi);
+	double siny_cosp = +2.0 * ((double)qW * qZ + (double)qX * qY);
+	double cosy_cosp = +1.0 - 2.0 * ((double)qY * qY + (double)qZ * qZ);
+	m_yaw = (float)atan2(siny_cosp, cosy_cosp) * (180 / MathConstants<double>::pi);
 
     m_yaw *= -1.0f;
     if (m_pitch < -90.0f || m_pitch > 90.0f) m_roll *= -1.0f;
