@@ -25,17 +25,47 @@
 
 Bridge::Bridge()
 {
-    BaudR = 115200;
-    startTimer(10);
+    sender.connect(m_ipAddress, m_oscPortNumber);
 }
 
 Bridge::~Bridge()
 {
-	if (m_connected == true)
+	if (m_serialPortConnected)
 	{
-		disconnectBridge();
-	}   
-    stopTimer();
+		disconnectSerial();
+	}
+    disconnectOscReceiver();
+    sender.disconnect();
+}
+
+bool Bridge::connectOscReceiver()
+{
+    bool isConnected = connect(8888); // osc input at port 8888
+    addListener(this);
+    return isConnected;
+}
+
+void Bridge::disconnectOscReceiver()
+{
+    disconnect();
+}
+
+void Bridge::oscMessageReceived(const OSCMessage& message)
+{
+    if (message.getAddressPattern().toString() == "/bridge/quat" && message.size() == 4)
+    {
+		qlW = message[0].getFloat32();
+		qlX = message[1].getFloat32();
+		qlY = message[2].getFloat32();
+		qlZ = message[3].getFloat32();
+		pushQuaternionVector();
+    }
+}
+
+void Bridge::oscBundleReceived(const OSCBundle& bundle)
+{
+    OSCBundle::Element elem = bundle[0];
+    oscMessageReceived(elem.getMessage());
 }
 
 StringArray Bridge::getPortInfo()
@@ -46,13 +76,13 @@ StringArray Bridge::getPortInfo()
     return portlist.getAllValues();
 }
 
-bool Bridge::connectBridge()
+bool Bridge::connectSerial()
 {
     port_state = comOpen(PortN, BaudR);
     if (port_state == 1)
     {
-        sender.connect(m_ipAddress, m_oscPortNumber);
-        m_connected = true;
+        m_serialPortConnected = true;
+        startTimer(10);
         return true;
     }
     else
@@ -61,23 +91,23 @@ bool Bridge::connectBridge()
     }
 }
 
-void Bridge::disconnectBridge()
+void Bridge::disconnectSerial()
 {
     comClose(PortN);
-    sender.disconnect();
-    m_connected = false;
+    m_serialPortConnected = false;
+    stopTimer();
 }
 
-bool Bridge::isConnected()
+bool Bridge::isSerialConnected()
 {
-    return m_connected;
+    return m_serialPortConnected;
 }
 
 void Bridge::timerCallback()
 {
-	if(m_connected)
+	if(m_serialPortConnected)
     {    
-        memset(&readBuffer[0], 0, sizeof(readBuffer));
+        char readBuffer[128];
         comRead(PortN, readBuffer, 128);
         
         if(strlen(readBuffer) != 0)
@@ -89,46 +119,57 @@ void Bridge::timerCallback()
                 qlX = m_quatsReceived[1].getFloatValue();
                 qlY = m_quatsReceived[2].getFloatValue();
                 qlZ = m_quatsReceived[3].getFloatValue();
-
-                qW = qbW * qlW + qbX * qlX + qbY * qlY + qbZ * qlZ;
-                qX = qbW * qlX - qbX * qlW - qbY * qlZ + qbZ * qlY;
-                qY = qbW * qlY + qbX * qlZ - qbY * qlW - qbZ * qlX;
-                qZ = qbW * qlZ - qbX * qlY + qbY * qlX - qbZ * qlW;
-                
-                if (m_quatsActive)
-                {
-                    const Array<float> quats = {qW, qX, qY, qZ};
-                    if (m_quatsOrder.size() == 4 && m_quatsSigns.size() == 4)
-                    {
-                        sender.send(m_quatsOscAddress,
-                            m_quatsSigns[0] * quats[m_quatsOrder[0]],
-                            m_quatsSigns[1] * quats[m_quatsOrder[1]],
-                            m_quatsSigns[2] * quats[m_quatsOrder[2]],
-                            m_quatsSigns[3] * quats[m_quatsOrder[3]]);
-                    }
-                }
-
-                updateEuler();
-
-                // Map and send rpy OSC
-                m_rollOSC     = (float) jmap(m_roll, (float) -180, (float) 180, m_rollOscMin, m_rollOscMax);
-                m_pitchOSC    = (float) jmap(m_pitch, (float) -180, (float) 180, m_pitchOscMin, m_pitchOscMax);
-                m_yawOSC      = (float) jmap(m_yaw, (float) -180, (float) 180, m_yawOscMin, m_yawOscMax);
-                if (m_rollActive) sender.send(m_rollOscAddress, m_rollOSC);
-                if (m_pitchActive) sender.send(m_pitchOscAddress, m_pitchOSC);
-                if (m_yawActive) sender.send(m_yawOscAddress, m_yawOSC);
-                if (m_rpyActive)
-                {
-					if (m_rpyOscKey == "rpy") sender.send(m_rpyOscAddress, m_rollOSC, m_pitchOSC, m_yawOSC);
-					else if (m_rpyOscKey == "ypr") sender.send(m_rpyOscAddress, m_yawOSC, m_pitchOSC, m_rollOSC);
-					else if (m_rpyOscKey == "pry") sender.send(m_rpyOscAddress, m_pitchOSC, m_rollOSC, m_yawOSC);
-					else if (m_rpyOscKey == "yrp") sender.send(m_rpyOscAddress, m_yawOSC, m_rollOSC, m_pitchOSC);
-					else if (m_rpyOscKey == "ryp") sender.send(m_rpyOscAddress, m_rollOSC, m_yawOSC, m_pitchOSC);
-					else if (m_rpyOscKey == "pyr") sender.send(m_rpyOscAddress, m_pitchOSC, m_yawOSC, m_rollOSC);
-                }
+                pushQuaternionVector();
             }
         }
 	}
+}
+
+void Bridge::pushQuaternionVector()
+{
+    // normalization (just in case)
+    double magnitude = sqrt(qlW * qlW + qlX * qlX + qlY * qlY + qlZ * qlZ);
+    qlW /= magnitude;
+    qlX /= magnitude;
+    qlY /= magnitude;
+    qlZ /= magnitude;
+
+    qW = qbW * qlW + qbX * qlX + qbY * qlY + qbZ * qlZ;
+    qX = qbW * qlX - qbX * qlW - qbY * qlZ + qbZ * qlY;
+    qY = qbW * qlY + qbX * qlZ - qbY * qlW - qbZ * qlX;
+    qZ = qbW * qlZ - qbX * qlY + qbY * qlX - qbZ * qlW;
+
+    if (m_quatsActive)
+    {
+        const Array<float> quats = { qW, qX, qY, qZ };
+        if (m_quatsOrder.size() == 4 && m_quatsSigns.size() == 4)
+        {
+            sender.send(m_quatsOscAddress,
+                m_quatsSigns[0] * quats[m_quatsOrder[0]],
+                m_quatsSigns[1] * quats[m_quatsOrder[1]],
+                m_quatsSigns[2] * quats[m_quatsOrder[2]],
+                m_quatsSigns[3] * quats[m_quatsOrder[3]]);
+        }
+    }
+
+    updateEuler();
+
+    // Map and send rpy OSC
+    m_rollOSC = (float)jmap(m_roll, (float)-180, (float)180, m_rollOscMin, m_rollOscMax);
+    m_pitchOSC = (float)jmap(m_pitch, (float)-180, (float)180, m_pitchOscMin, m_pitchOscMax);
+    m_yawOSC = (float)jmap(m_yaw, (float)-180, (float)180, m_yawOscMin, m_yawOscMax);
+    if (m_rollActive) sender.send(m_rollOscAddress, m_rollOSC);
+    if (m_pitchActive) sender.send(m_pitchOscAddress, m_pitchOSC);
+    if (m_yawActive) sender.send(m_yawOscAddress, m_yawOSC);
+    if (m_rpyActive)
+    {
+        if (m_rpyOscKey == "rpy") sender.send(m_rpyOscAddress, m_rollOSC, m_pitchOSC, m_yawOSC);
+        else if (m_rpyOscKey == "ypr") sender.send(m_rpyOscAddress, m_yawOSC, m_pitchOSC, m_rollOSC);
+        else if (m_rpyOscKey == "pry") sender.send(m_rpyOscAddress, m_pitchOSC, m_rollOSC, m_yawOSC);
+        else if (m_rpyOscKey == "yrp") sender.send(m_rpyOscAddress, m_yawOSC, m_rollOSC, m_pitchOSC);
+        else if (m_rpyOscKey == "ryp") sender.send(m_rpyOscAddress, m_rollOSC, m_yawOSC, m_pitchOSC);
+        else if (m_rpyOscKey == "pyr") sender.send(m_rpyOscAddress, m_pitchOSC, m_yawOSC, m_rollOSC);
+    }
 }
 
 void Bridge::resetOrientation()

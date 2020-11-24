@@ -43,15 +43,17 @@ public:
     void resized() override;
 
 private:
+	void switchInput();
 	void refreshPortList();
 	void updateBridgeSettings();
 	bool validateQuatsKey();
 	void loadSettings();
 	void saveSettings();
 	void loadPreset(int index);
-	void loadPresetXml();
-	ApplicationProperties appSettings;
+	bool loadPresetXml();
 
+	ApplicationProperties appSettings;
+	TextButton m_serialInputButton, m_oscInputButton;
 	TextButton m_refreshButton, m_connectButton, m_resetButton;
 	TextButton m_quatsOscActive, m_rollOscActive, m_pitchOscActive, m_yawOscActive, m_rpyOscActive;
 	ComboBox m_portListCB, m_yprOrderCB, m_oscPresetCB;
@@ -88,7 +90,6 @@ private:
 	BinauralHeadView m_binauralHeadView;
 
 	std::unique_ptr<juce::XmlElement> presetList;
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

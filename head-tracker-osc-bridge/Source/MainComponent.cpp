@@ -25,6 +25,21 @@
 
 MainComponent::MainComponent()
 {
+	m_serialInputButton.setButtonText("Serial");
+	m_serialInputButton.setColour(TextButton::buttonColourId, clblue);
+	m_serialInputButton.setColour(TextButton::buttonOnColourId, cgrnsh);
+	m_serialInputButton.setToggleState(true, dontSendNotification);
+	m_serialInputButton.setLookAndFeel(&SMLF);
+	m_serialInputButton.addListener(this);
+	addAndMakeVisible(m_serialInputButton);
+
+	m_oscInputButton.setButtonText("OSC");
+	m_oscInputButton.setColour(TextButton::buttonColourId, clblue);
+	m_oscInputButton.setColour(TextButton::buttonOnColourId, cgrnsh);
+	m_oscInputButton.setLookAndFeel(&SMLF);
+	m_oscInputButton.addListener(this);
+	addAndMakeVisible(m_oscInputButton);
+
 	m_refreshButton.setButtonText("Refresh");
 	m_refreshButton.setColour(TextButton::buttonColourId, clblue);
 	m_refreshButton.setLookAndFeel(&SMLF);
@@ -101,20 +116,24 @@ MainComponent::MainComponent()
 	m_yprOrderCB.onChange = [this] { updateBridgeSettings(); };
 	addAndMakeVisible(m_yprOrderCB);
 
-	// presets
-	loadPresetXml();
-
 	m_oscPresetCB.setEditableText(false);
 	m_oscPresetCB.setJustificationType(Justification::centred);
-	StringArray presets;
-	for (int id = 1; id <= presetList->getNumChildElements(); ++id)
-	{
-		presets.add(presetList->getChildByAttribute("ID", String(id))->getStringAttribute("name"));
-	}
-	m_oscPresetCB.addItemList(presets, 1);
-	m_oscPresetCB.setTextWhenNothingSelected(String("select preset"));
 	m_oscPresetCB.setLookAndFeel(&SMLF);
 	m_oscPresetCB.onChange = [this] { loadPreset(m_oscPresetCB.getSelectedId()); };
+	if (loadPresetXml())
+	{
+		StringArray presets;
+		for (int id = 1; id <= presetList->getNumChildElements(); ++id)
+		{
+			presets.add(presetList->getChildByAttribute("ID", String(id))->getStringAttribute("name"));
+		}
+		m_oscPresetCB.addItemList(presets, 1);
+		m_oscPresetCB.setTextWhenNothingSelected(String("select preset"));
+	}
+	else
+	{
+		m_oscPresetCB.setTextWhenNothingSelected(String("presets.xml file is missing"));
+	}
 	addAndMakeVisible(m_oscPresetCB);
 
 	// labels
@@ -168,7 +187,7 @@ MainComponent::MainComponent()
 
 	loadSettings();
 	startTimerHz(20);
-	setSize(300, 620);
+	setSize(300, 650);
 }
 
 MainComponent::~MainComponent()
@@ -192,8 +211,8 @@ void MainComponent::paint (Graphics& g)
 
 	// labels
 	Rectangle<float> serialLabelArea(10, 40, 280, 50);
-	Rectangle<float> imuLabelArea(10, 180, 280, 50);
-	Rectangle<float> oscLabelArea(10, 310, 280, 50);
+	Rectangle<float> imuLabelArea(10, 220, 280, 50);
+	Rectangle<float> oscLabelArea(10, 350, 280, 50);
 
 	g.setColour(clrblue);
 	g.fillRoundedRectangle(serialLabelArea, 3.0f);
@@ -202,20 +221,29 @@ void MainComponent::paint (Graphics& g)
 
 	g.setColour(cdark);
 	g.setFont(titlefontB.withPointHeight(15));
-	g.drawText("Serial Port Configuration", serialLabelArea.removeFromRight(270), Justification::left);
+	g.drawText("Input Configuration", serialLabelArea.removeFromRight(270), Justification::left);
 	g.drawText("IMU Orientation", imuLabelArea.removeFromRight(270), Justification::left);
-	g.drawText("OSC Configuration", oscLabelArea.removeFromRight(270), Justification::left);
+	g.drawText("Output Configuration", oscLabelArea.removeFromRight(270), Justification::left);
 
 	g.drawImageAt(iserial, 210, 52);
 
 	// other texts
 	g.setFont(titlefontB.withPointHeight(14));
 	g.setColour(clrblue);
-	g.drawText("Port List:", 10, 140, 135, 30, Justification::centred);
+	if (m_serialInputButton.getToggleState())
+	{
+		g.drawText("Port List:", 10, 180, 135, 30, Justification::centred);
+	}
+	if (m_oscInputButton.getToggleState())
+	{
+		g.drawText("Receiving port: 8888", 10, 140, 280, 30, Justification::centred);
+		g.drawText("OSC address: /bridge/quat", 10, 170, 280, 30, Justification::centred);
+	}
+
 	g.setFont(titlefontB.withPointHeight(13));
-	g.drawText("Roll (Y):", 20, 240, 125, 20, Justification::centredLeft);
-	g.drawText("Pitch (X):", 20, 260, 125, 20, Justification::centredLeft);
-	g.drawText("Yaw (Z):", 20, 280, 125, 20, Justification::centredLeft);
+	g.drawText("Roll (Y):", 20, 280, 125, 20, Justification::centredLeft);
+	g.drawText("Pitch (X):", 20, 300, 125, 20, Justification::centredLeft);
+	g.drawText("Yaw (Z):", 20, 320, 125, 20, Justification::centredLeft);
 
 	// version number & authors
 	g.setFont(titlefontB.withPointHeight(12));
@@ -226,49 +254,63 @@ void MainComponent::paint (Graphics& g)
 
 void MainComponent::resized()
 {
-	m_refreshButton.setBounds(10, 100, 135, 30);
-	m_connectButton.setBounds(155, 100, 135, 30);
-	m_portListCB.setBounds(155, 140, 135, 30);
-	m_resetButton.setBounds(155, 240, 135, 60);
+	int shift = 40;
+	m_serialInputButton.setBounds(10, 100, 135, 30);
+	m_oscInputButton.setBounds(155, 100, 135, 30);
+	m_refreshButton.setBounds(10, 100 + shift, 135, 30);
+	m_connectButton.setBounds(155, 100 + shift, 135, 30);
+	m_portListCB.setBounds(155, 140 + shift, 135, 30);
+	m_resetButton.setBounds(155, 240 + shift, 135, 60);
 
-	m_rollLabel.setBounds(70, 240, 65, 20);
-	m_pitchLabel.setBounds(70, 260, 65, 20);
-	m_yawLabel.setBounds(70, 280, 65, 20);
+	m_rollLabel.setBounds(70, 240 + shift, 65, 20);
+	m_pitchLabel.setBounds(70, 260 + shift, 65, 20);
+	m_yawLabel.setBounds(70, 280 + shift, 65, 20);
 
-	m_binauralHeadView.setBounds(220, 180, 50, 50);
+	m_binauralHeadView.setBounds(220, 180 + shift, 50, 50);
 
-	m_quatsOscActive.setBounds(10, 370, 25, 25);
-	m_rollOscActive.setBounds(10, 400, 25, 25);
-	m_pitchOscActive.setBounds(10, 430, 25, 25);
-	m_yawOscActive.setBounds(10, 460, 25, 25);
-	m_rpyOscActive.setBounds(10, 490, 25, 25);
+	m_quatsOscActive.setBounds(10, 370 + shift, 25, 25);
+	m_rollOscActive.setBounds(10, 400 + shift, 25, 25);
+	m_pitchOscActive.setBounds(10, 430 + shift, 25, 25);
+	m_yawOscActive.setBounds(10, 460 + shift, 25, 25);
+	m_rpyOscActive.setBounds(10, 490 + shift, 25, 25);
 
-	m_quatsOscAddress.setBounds(40, 370, 105, 25);
-	m_quatsKeyLabel.setBounds(155, 370, 135, 25);
-	m_rollOscAddress.setBounds(40, 400, 105, 25);
-	m_pitchOscAddress.setBounds(40, 430, 105, 25);
-	m_yawOscAddress.setBounds(40, 460, 105, 25);
-	m_rpyOscAddress.setBounds(40, 490, 105, 25);
-	m_rollOscMin.setBounds(155, 400, 40, 25);
-	m_pitchOscMin.setBounds(155, 430, 40, 25);
-	m_yawOscMin.setBounds(155, 460, 40, 25);
-	m_rollOscMax.setBounds(200, 400, 40, 25);
-	m_pitchOscMax.setBounds(200, 430, 40, 25);
-	m_yawOscMax.setBounds(200, 460, 40, 25);
-	m_rollOscVal.setBounds(245, 400, 45, 25);
-	m_pitchOscVal.setBounds(245, 430, 45, 25);
-	m_yawOscVal.setBounds(245, 460, 45, 25);
-	m_ipAddress.setBounds(10, 520, 135, 25);
-	m_portNumber.setBounds(155, 520, 135, 25);
+	m_quatsOscAddress.setBounds(40, 370 + shift, 105, 25);
+	m_quatsKeyLabel.setBounds(155, 370 + shift, 135, 25);
+	m_rollOscAddress.setBounds(40, 400 + shift, 105, 25);
+	m_pitchOscAddress.setBounds(40, 430 + shift, 105, 25);
+	m_yawOscAddress.setBounds(40, 460 + shift, 105, 25);
+	m_rpyOscAddress.setBounds(40, 490 + shift, 105, 25);
+	m_rollOscMin.setBounds(155, 400 + shift, 40, 25);
+	m_pitchOscMin.setBounds(155, 430 + shift, 40, 25);
+	m_yawOscMin.setBounds(155, 460 + shift, 40, 25);
+	m_rollOscMax.setBounds(200, 400 + shift, 40, 25);
+	m_pitchOscMax.setBounds(200, 430 + shift, 40, 25);
+	m_yawOscMax.setBounds(200, 460 + shift, 40, 25);
+	m_rollOscVal.setBounds(245, 400 + shift, 45, 25);
+	m_pitchOscVal.setBounds(245, 430 + shift, 45, 25);
+	m_yawOscVal.setBounds(245, 460 + shift, 45, 25);
+	m_ipAddress.setBounds(10, 520 + shift, 135, 25);
+	m_portNumber.setBounds(155, 520 + shift, 135, 25);
 
-	m_yprOrderCB.setBounds(155, 490, 135, 25);
-	m_oscPresetCB.setBounds(10, 550, 280, 25);
+	m_yprOrderCB.setBounds(155, 490 + shift, 135, 25);
+	m_oscPresetCB.setBounds(10, 550 + shift, 280, 25);
 }
 
 void MainComponent::buttonClicked(Button* buttonThatWasClicked)
 {
-
-	if (buttonThatWasClicked == &m_refreshButton)
+	if (buttonThatWasClicked == &m_serialInputButton)
+	{
+		m_serialInputButton.setToggleState(true, dontSendNotification);
+		m_oscInputButton.setToggleState(false, dontSendNotification);
+		switchInput();
+	}
+	else if (buttonThatWasClicked == &m_oscInputButton)
+	{
+		m_serialInputButton.setToggleState(false, dontSendNotification);
+		m_oscInputButton.setToggleState(true, dontSendNotification);
+		switchInput();
+	}
+	else if (buttonThatWasClicked == &m_refreshButton)
 	{
 		refreshPortList();
 	}
@@ -276,7 +318,7 @@ void MainComponent::buttonClicked(Button* buttonThatWasClicked)
 	{
 		if (m_connectButton.getToggleState())
 		{
-			bridge.disconnectBridge();
+			bridge.disconnectSerial();
 			m_connectButton.setToggleState(false, dontSendNotification);
 			m_connectButton.setButtonText("Connect");
 			m_refreshButton.setEnabled(true);
@@ -285,7 +327,7 @@ void MainComponent::buttonClicked(Button* buttonThatWasClicked)
 		}
 		else
 		{
-			if (bridge.connectBridge())
+			if (bridge.connectSerial())
 			{
 				m_connectButton.setToggleState(true, dontSendNotification);
 				m_connectButton.setButtonText("Disconnect");
@@ -295,15 +337,46 @@ void MainComponent::buttonClicked(Button* buttonThatWasClicked)
 			}
 		}
 	}
-	else if (buttonThatWasClicked == &m_resetButton && bridge.isConnected())
+	else if (buttonThatWasClicked == &m_resetButton)
 	{
 		bridge.resetOrientation();
 	}
 }
 
+void MainComponent::switchInput()
+{
+	bool serialInput = m_serialInputButton.getToggleState();
+	m_refreshButton.setVisible(serialInput);
+	m_connectButton.setVisible(serialInput);
+	m_portListCB.setVisible(serialInput);
+	if (!serialInput)
+	{
+		bridge.disconnectSerial();
+		m_connectButton.setToggleState(false, dontSendNotification);
+		m_connectButton.setButtonText("Connect");
+		m_refreshButton.setEnabled(true);
+		m_portListCB.setEnabled(true);
+		m_resetButton.setEnabled(false);
+	}
+
+	bool oscInput = m_oscInputButton.getToggleState();
+	if (oscInput)
+	{
+		bridge.connectOscReceiver();
+		m_resetButton.setEnabled(true);
+	}
+	else
+	{
+		bridge.disconnectOscReceiver();
+	}
+
+	repaint();
+}
+
 void MainComponent::timerCallback()
 {
-	if (bridge.isConnected())
+	// if (bridge.isConnected())
+	if (true)
 	{
 		m_rollLabel.setText(String(bridge.getRoll(),1) + "°", dontSendNotification);
 		m_pitchLabel.setText(String(bridge.getPitch(),1) + "°", dontSendNotification);
@@ -341,6 +414,7 @@ void MainComponent::updateBridgeSettings()
 	if (m_pitchOscAddress.getText().isEmpty()) m_pitchOscAddress.setText("/pitch", dontSendNotification);
 	if (m_yawOscAddress.getText().isEmpty()) m_yawOscAddress.setText("/yaw", dontSendNotification);
 	if (m_rpyOscAddress.getText().isEmpty()) m_rpyOscAddress.setText("/rpy", dontSendNotification);
+	if (m_quatsKeyLabel.getText().isEmpty()) m_quatsKeyLabel.setText("qW, qX, -qY, qZ", dontSendNotification);
 
 	if (!m_quatsOscAddress.getText().startsWithChar('/')) m_quatsOscAddress.setText("/" + m_quatsOscAddress.getText(), dontSendNotification);
 	if (!m_rollOscAddress.getText().startsWithChar('/')) m_rollOscAddress.setText("/" + m_rollOscAddress.getText(), dontSendNotification);
@@ -355,7 +429,6 @@ void MainComponent::updateBridgeSettings()
 	else
 	{
 		AlertWindow::showMessageBoxAsync(AlertWindow::NoIcon, "Use the following format:", "qW, qX, -qY, qZ", "OK");
-		m_quatsKeyLabel.setText("qW, qX, -qY, qZ", dontSendNotification);
 	}
 
 	bridge.setupRollOSC(m_rollOscActive.getToggleState(), m_rollOscAddress.getText(), m_rollOscMin.getText().getFloatValue(), m_rollOscMax.getText().getFloatValue());
@@ -466,7 +539,8 @@ void MainComponent::saveSettings()
 
 void MainComponent::loadPreset(int id)
 {
-	if (id <= presetList->getNumChildElements())
+	//if (id <= presetList->getNumChildElements())
+	if (presetList != nullptr)
 	{
 		XmlElement* preset = presetList->getChildByAttribute("ID", String(id));
 
@@ -505,10 +579,11 @@ void MainComponent::loadPreset(int id)
 		if (preset->getStringAttribute("portNumber") != "")
 			m_portNumber.setText(preset->getStringAttribute("portNumber"), dontSendNotification);
 	}
+
 	updateBridgeSettings();
 }
 
-void MainComponent::loadPresetXml()
+bool MainComponent::loadPresetXml()
 {
 	auto dir = juce::File::getCurrentWorkingDirectory();
 
@@ -517,11 +592,11 @@ void MainComponent::loadPresetXml()
 
 	if (dir.getChildFile("presets.xml").existsAsFile())
 	{
-		presetsFile = dir.getChildFile("Resources").getChildFile("presets.xml");
+		presetsFile = dir.getChildFile("presets.xml");
 	}
 	else
 	{
-		while (!dir.getChildFile("Resources").exists() && numTries++ < 15)
+		while (!dir.getChildFile("Resources").getChildFile("presets.xml").existsAsFile() && numTries++ < 15)
 			dir = dir.getParentDirectory();
 
 		presetsFile = dir.getChildFile("Resources").getChildFile("presets.xml");
@@ -530,5 +605,11 @@ void MainComponent::loadPresetXml()
 	if (presetsFile.exists())
 	{
 		presetList = juce::XmlDocument::parse(presetsFile);
+		return true;
+	}
+	else
+	{
+		presetList = nullptr;
+		return false;
 	}
 }

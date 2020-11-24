@@ -26,18 +26,25 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "rs232.h"
 
-class Bridge : private Timer
-
+class Bridge	: private Timer
+				, private OSCReceiver
+				, private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>
 {
 public:
     Bridge();    
     ~Bridge();
+	bool connectOscReceiver();
+	void disconnectOscReceiver();
+
+	void oscMessageReceived(const OSCMessage& message) override;
+	void oscBundleReceived(const OSCBundle& bundle) override;
     
 	StringArray getPortInfo();
-    bool connectBridge();
-    void disconnectBridge();
-	bool isConnected();
+    bool connectSerial();
+    void disconnectSerial();
+	bool isSerialConnected();
 	void timerCallback() override;
+	void pushQuaternionVector();
 	void resetOrientation();
 	void updateEuler();
 
@@ -55,18 +62,17 @@ public:
 	void setupRpyOSC(bool isActive, String address, String key);
 	void setupIp(String address, int port);
 
-	int BaudR, PortN;       
+	int BaudR = 115200, PortN;
 private:
 	StringPairArray portlist;
 
 	int port_number, port_index, port_state;
-	char readBuffer[128];
 
-	double qW, qX, qY, qZ;
-	double qlW, qlX, qlY, qlZ;
-	double qbW = 1, qbX = 0, qbY = 0, qbZ = 0;
+	double qW = 1.0, qX = 0.0, qY = 0.0, qZ = 0.0;
+	double qlW = 1.0, qlX = 0.0, qlY = 0.0, qlZ = 0.0;
+	double qbW = 1.0, qbX = 0.0, qbY = 0.0, qbZ = 0.0;
 
-	float m_roll, m_pitch, m_yaw;
+	float m_roll = 0.0, m_pitch = 0.0, m_yaw = 0.0;
 	bool m_quatsActive, m_rollActive, m_pitchActive, m_yawActive, m_rpyActive;
 	String m_quatsOscAddress;
 	Array<int> m_quatsOrder, m_quatsSigns;
@@ -74,9 +80,9 @@ private:
 	float m_rollOscMin, m_pitchOscMin, m_yawOscMin;
 	float m_rollOscMax, m_pitchOscMax, m_yawOscMax;
 	String m_rpyOscAddress, m_rpyOscKey;
-	float m_rollOSC, m_pitchOSC, m_yawOSC;
+	float m_rollOSC = 0.0, m_pitchOSC = 0.0, m_yawOSC = 0.0;
 
-	bool m_connected = false;
+	bool m_serialPortConnected = false;
 	String m_ipAddress;
 	int m_oscPortNumber;
 	OSCSender sender;
