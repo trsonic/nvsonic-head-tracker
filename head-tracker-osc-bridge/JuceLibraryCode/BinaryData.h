@@ -9,7 +9,7 @@
 namespace BinaryData
 {
     extern const char*   male_head_obj;
-    const int            male_head_objSize = 251818;
+    const int            male_head_objSize = 259542;
 
     extern const char*   axis_png;
     const int            axis_pngSize = 1653;
