@@ -375,27 +375,13 @@ void MainComponent::switchInput()
 
 void MainComponent::timerCallback()
 {
-	// if (bridge.isConnected())
-	if (true)
-	{
-		m_rollLabel.setText(String(bridge.getRoll(),1) + "°", dontSendNotification);
-		m_pitchLabel.setText(String(bridge.getPitch(),1) + "°", dontSendNotification);
-		m_yawLabel.setText(String(bridge.getYaw(),1) + "°", dontSendNotification);
-		m_rollOscVal.setText(String(bridge.getRollOSC(), 2), dontSendNotification);
-		m_pitchOscVal.setText(String(bridge.getPitchOSC(), 2), dontSendNotification);
-		m_yawOscVal.setText(String(bridge.getYawOSC(), 2), dontSendNotification);
-
-		m_binauralHeadView.setHeadOrientation(bridge.getRoll(), bridge.getPitch(), bridge.getYaw());
-	}
-	else
-	{
-		m_rollLabel.setText("", dontSendNotification);
-		m_pitchLabel.setText("", dontSendNotification);
-		m_yawLabel.setText("", dontSendNotification);
-		m_rollOscVal.setText("", dontSendNotification);
-		m_pitchOscVal.setText("", dontSendNotification);
-		m_yawOscVal.setText("", dontSendNotification);
-	}
+    m_rollLabel.setText(String(bridge.getRoll(),1) + "°", dontSendNotification);
+    m_pitchLabel.setText(String(bridge.getPitch(),1) + "°", dontSendNotification);
+    m_yawLabel.setText(String(bridge.getYaw(),1) + "°", dontSendNotification);
+    m_rollOscVal.setText(String(bridge.getRollOSC(), 2), dontSendNotification);
+    m_pitchOscVal.setText(String(bridge.getPitchOSC(), 2), dontSendNotification);
+    m_yawOscVal.setText(String(bridge.getYawOSC(), 2), dontSendNotification);
+    m_binauralHeadView.setHeadOrientation(bridge.getRoll(), bridge.getPitch(), bridge.getYaw());
 }
 
 void MainComponent::refreshPortList()
@@ -585,7 +571,7 @@ void MainComponent::loadPreset(int id)
 
 bool MainComponent::loadPresetXml()
 {
-	auto dir = juce::File::getCurrentWorkingDirectory();
+    File dir = File::getSpecialLocation(File::currentApplicationFile).getParentDirectory();
 
 	int numTries = 0;
 	File presetsFile;
