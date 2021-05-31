@@ -27,6 +27,12 @@ Connect the IMU sensor with Arduino board according to the diagram shown below.
 
 ![IMU and Arduino board wiring diagram](images/schematic.png)
 
+## RJ Lab 3D Printed Enclosure
+Thanks to Rémi Janot the head tracker can be mounted in this neat 3D printed enclosure. Check out his [Facebook page](https://www.facebook.com/RJ-Lab-110388251245900) or contact him directly (remi-janot@outlook.fr) if you're interested in one.
+
+
+![MRJ LAB 3d printed enclosure](images/rj_lab_enclosure.jpg)
+
 ## Flashing Arduino
 - Connect the assembled Head Tracker to your computer using a Micro USB cable.
 - Clone / download this repository.
@@ -62,10 +68,13 @@ The OSC HT Bridge app can control a wide range of spatial audio plugins as well 
 The following software tools can be controlled using the presets provided with the OSC HT Bridge app:
 - [Matthias Kronlachner's ambix_rotator](http://www.matthiaskronlachner.com/?p=2015)
 - [IEM SceneRotator](https://plugins.iem.at/)
-- [SPARTA AmbiBIN](http://research.spa.aalto.fi/projects/sparta_vsts/plugins.html)
+- [SPARTA AmbiBIN and Rotator](http://research.spa.aalto.fi/projects/sparta_vsts/plugins.html)
 - [AudioLab SALTE](https://github.com/AudioLabYork/SALTE-audio-renderer)
 - [Noise Makers Ambi Head HD](https://www.noisemakers.fr/ambi-head-hd/)
 - [Unity](https://unity.com/)
+- [3D Tune-In Toolkit](https://github.com/3DTune-In/3dti_AudioToolkit)
+- [SSA aXRotate](https://www.ssa-plugins.com/product/axrotate/)
+- [Mach1 Monitor](https://www.mach1.tech/spatial-system#monitor)
 
 ## Compatibility with Other Head Trackers
 The OSC HT Bridge can be used with other tracking systems. We provide an experimetal support for the [OHTI Headtracker](https://github.com/bossesand/OHTI). It can be connected with the Bridge using both serial (over USB) or OSC (over Wifi) communication. This feature will be extended to more devices in the future.
@@ -84,3 +93,5 @@ OSC messages sent by the Bridge app can be used to control different plugin para
 - Jacek Majer - PhD Student at Warsaw University of Technology, Poland
 
 The Arduino code is based on the following project: https://github.com/rpicopter/ArduinoMotionSensorExample
+
+Also thanks to Rémi Janot and Charles Verron for their contribution!

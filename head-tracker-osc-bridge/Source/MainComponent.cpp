@@ -248,8 +248,8 @@ void MainComponent::paint (Graphics& g)
 	// version number & authors
 	g.setFont(titlefontB.withPointHeight(12));
 	g.setColour(clblue);
-	g.drawText("version 3.0", 10, getHeight() - 30, 280, 20, Justification::bottomLeft);
-	g.drawText("2020 Tomasz Rudzki, Jacek Majer", 10, getHeight() - 30, 280, 20, Justification::bottomRight);
+	g.drawText("version 3.1", 10, getHeight() - 30, 280, 20, Justification::bottomLeft);
+	g.drawText("2021 Tomasz Rudzki, Jacek Majer", 10, getHeight() - 30, 280, 20, Justification::bottomRight);
 }
 
 void MainComponent::resized()

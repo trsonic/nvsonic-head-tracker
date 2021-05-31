@@ -182,26 +182,47 @@ void Bridge::resetOrientation()
 
 void Bridge::updateEuler()
 {
-	// roll (y-axis rotation)
-	double sinp = +2.0 * ((double)qW * qY - (double)qZ * qX);
-	if (fabs(sinp) >= 1)
-		m_roll = (float)copysign(MathConstants<double>::pi / 2, sinp) * (180 / MathConstants<double>::pi);
-	else
-		m_roll = (float)asin(sinp) * (180 / MathConstants<double>::pi);
+	const Array<float> quats = { qW, qX, qY, qZ };
 
-	// pitch (x-axis rotation)
-	double sinr_cosp = +2.0 * ((double)qW * qX + (double)qY * qZ);
-	double cosr_cosp = +1.0 - 2.0 * ((double)qX * qX + (double)qY * qY);
-	m_pitch = (float)atan2(sinr_cosp, cosr_cosp) * (180 / MathConstants<double>::pi);
+	qW = quats[0];
+	qX = quats[2];
+	qY = quats[1];
+	qZ = quats[3];
 
-	// yaw (z-axis rotation)
-	double siny_cosp = +2.0 * ((double)qW * qZ + (double)qX * qY);
-	double cosy_cosp = +1.0 - 2.0 * ((double)qY * qY + (double)qZ * qZ);
-	m_yaw = (float)atan2(siny_cosp, cosy_cosp) * (180 / MathConstants<double>::pi);
+	// thanks to Charles Verron (https://www.noisemakers.fr/) for providing the code snippet used below
+
+	double test = qX * qZ + qY * qW;
+	if (test > 0.499999)
+	{
+		// singularity at north pole
+		m_yaw = 2 * atan2(qX, qW);
+		m_pitch = MathConstants<double>::pi / 2;
+		m_roll = 0;
+		return;
+	}
+	if (test < -0.499999)
+	{
+		// singularity at south pole
+		m_yaw = -2 * atan2(qX, qW);
+		m_pitch = -MathConstants<double>::pi / 2;
+		m_roll = 0;
+		return;
+	}
+	double sqx = qX * qX;
+	double sqy = qZ * qZ;
+	double sqz = qY * qY;
+
+	m_yaw = atan2(2 * qZ*qW - 2 * qX*qY, 1 - 2 * sqy - 2 * sqz);
+	m_pitch = asin(2 * test);
+	m_roll = atan2(2 * qX*qW - 2 * qZ*qY, 1 - 2 * sqx - 2 * sqz);
 
     m_yaw *= -1.0f;
-    if (m_pitch < -90.0f || m_pitch > 90.0f) m_roll *= -1.0f;
+
+	m_yaw = radiansToDegrees(m_yaw);
+	m_pitch = radiansToDegrees(m_pitch);
+	m_roll = radiansToDegrees(m_roll);
 }
+
 
 float Bridge::getRoll()
 {
