@@ -8,26 +8,14 @@ BinauralHeadView::BinauralHeadView()
 {
 	setOpaque(true);
 
+    m_renderingContext.setOpenGLVersionRequired (OpenGLContext::openGL3_2);
 	m_renderingContext.setRenderer(this);
 	m_renderingContext.attachTo(*this);
 	m_renderingContext.setContinuousRepainting(true);
 }
 
-void BinauralHeadView::init()
-{
-
-}
-
-void BinauralHeadView::deinit()
-{
-
-}
-
 void BinauralHeadView::setHeadOrientation(float roll, float pitch, float yaw)
 {
-	//m_roll = -roll;
-	//m_pitch = -pitch;
-	//m_yaw = yaw;
 	m_roll = roll;
 	m_pitch = -pitch;
 	m_yaw = -yaw + 180.0f;

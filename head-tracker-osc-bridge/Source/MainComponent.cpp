@@ -25,116 +25,95 @@
 
 MainComponent::MainComponent()
 {
+    // text buttons
+    Array<TextButton*> textButtons;
+    textButtons.add(&m_serialInputButton);
+    textButtons.add(&m_oscInputButton);
+    textButtons.add(&m_refreshButton);
+    textButtons.add(&m_connectButton);
+    textButtons.add(&m_resetButton);
+    textButtons.add(&m_quatsOscActive);
+    textButtons.add(&m_rollOscActive);
+    textButtons.add(&m_pitchOscActive);
+    textButtons.add(&m_yawOscActive);
+    textButtons.add(&m_rpyOscActive);
+    
+    for (int i = 0; i < textButtons.size(); i++)
+    {
+        textButtons[i]->setColour(TextButton::buttonColourId, clblue);
+        textButtons[i]->setColour(TextButton::buttonOnColourId, cgrnsh);
+        textButtons[i]->setColour(TextButton::textColourOnId, cdark);
+        textButtons[i]->setColour(TextButton::textColourOffId, cdark);
+        textButtons[i]->setLookAndFeel(&SMLF);
+        textButtons[i]->addListener(this);
+        addAndMakeVisible(textButtons[i]);
+    }
+
 	m_serialInputButton.setButtonText("Serial");
-	m_serialInputButton.setColour(TextButton::buttonColourId, clblue);
-	m_serialInputButton.setColour(TextButton::buttonOnColourId, cgrnsh);
 	m_serialInputButton.setToggleState(true, dontSendNotification);
-	m_serialInputButton.setLookAndFeel(&SMLF);
-	m_serialInputButton.addListener(this);
-	addAndMakeVisible(m_serialInputButton);
-
 	m_oscInputButton.setButtonText("OSC");
-	m_oscInputButton.setColour(TextButton::buttonColourId, clblue);
-	m_oscInputButton.setColour(TextButton::buttonOnColourId, cgrnsh);
-	m_oscInputButton.setLookAndFeel(&SMLF);
-	m_oscInputButton.addListener(this);
-	addAndMakeVisible(m_oscInputButton);
-
-	m_refreshButton.setButtonText("Refresh");
-	m_refreshButton.setColour(TextButton::buttonColourId, clblue);
-	m_refreshButton.setLookAndFeel(&SMLF);
-	m_refreshButton.addListener(this);
-	addAndMakeVisible(m_refreshButton);
-
+    m_refreshButton.setButtonText("Refresh");
 	m_connectButton.setButtonText("Connect");
-	m_connectButton.setColour(TextButton::buttonColourId, clblue);
-	m_connectButton.setColour(TextButton::buttonOnColourId, cgrnsh);
-	m_connectButton.setLookAndFeel(&SMLF);
-	m_connectButton.addListener(this);
-	addAndMakeVisible(m_connectButton);
-
 	m_resetButton.setButtonText("Reset");
-	m_resetButton.setColour(TextButton::buttonColourId, clblue);
-	m_resetButton.setLookAndFeel(&SMLF);
-	m_resetButton.addListener(this);
-	addAndMakeVisible(m_resetButton);
-
 	m_quatsOscActive.setButtonText("Q");
 	m_quatsOscActive.setClickingTogglesState(true);
 	m_quatsOscActive.onStateChange = [this] { updateBridgeSettings(); };
-	m_quatsOscActive.setColour(TextButton::buttonColourId, clblue);
-	m_quatsOscActive.setColour(TextButton::buttonOnColourId, cgrnsh);
-	m_quatsOscActive.setLookAndFeel(&SMLF);
-	addAndMakeVisible(m_quatsOscActive);
-
 	m_rollOscActive.setButtonText("R");
 	m_rollOscActive.setClickingTogglesState(true);
 	m_rollOscActive.onStateChange = [this] { updateBridgeSettings(); };
-	m_rollOscActive.setColour(TextButton::buttonColourId, clblue);
-	m_rollOscActive.setColour(TextButton::buttonOnColourId, cgrnsh);
-	m_rollOscActive.setLookAndFeel(&SMLF);
-	addAndMakeVisible(m_rollOscActive);
-
 	m_pitchOscActive.setButtonText("P");
 	m_pitchOscActive.setClickingTogglesState(true);
 	m_pitchOscActive.onStateChange = [this] { updateBridgeSettings(); };
-	m_pitchOscActive.setColour(TextButton::buttonColourId, clblue);
-	m_pitchOscActive.setColour(TextButton::buttonOnColourId, cgrnsh);
-	m_pitchOscActive.setLookAndFeel(&SMLF);
-	addAndMakeVisible(m_pitchOscActive);
-
-	m_yawOscActive.setButtonText("Y");
+    m_yawOscActive.setButtonText("Y");
 	m_yawOscActive.setClickingTogglesState(true);
 	m_yawOscActive.onStateChange = [this] { updateBridgeSettings(); };
-	m_yawOscActive.setColour(TextButton::buttonColourId, clblue);
-	m_yawOscActive.setColour(TextButton::buttonOnColourId, cgrnsh);
-	m_yawOscActive.setLookAndFeel(&SMLF);
-	addAndMakeVisible(m_yawOscActive);
-
-	m_rpyOscActive.setButtonText("3");
+    m_rpyOscActive.setButtonText("3");
 	m_rpyOscActive.setClickingTogglesState(true);
 	m_rpyOscActive.onStateChange = [this] { updateBridgeSettings(); };
-	m_rpyOscActive.setColour(TextButton::buttonColourId, clblue);
-	m_rpyOscActive.setColour(TextButton::buttonOnColourId, cgrnsh);
-	m_rpyOscActive.setLookAndFeel(&SMLF);
-	addAndMakeVisible(m_rpyOscActive);
 
-	m_portListCB.setEditableText(false);
-	m_portListCB.setJustificationType(Justification::centred);
-	m_portListCB.setTextWhenNothingSelected(String("select device"));
-	m_portListCB.setLookAndFeel(&SMLF);
-	m_portListCB.onChange = [this] { updateBridgeSettings(); };
-	addAndMakeVisible(m_portListCB);
-	refreshPortList();
+    // combo boxes
+    Array<ComboBox*> comboBoxes;
+    comboBoxes.add(&m_portListCB);
+    comboBoxes.add(&m_yprOrderCB);
+    comboBoxes.add(&m_oscPresetCB);
+    
+    for (int i = 0; i < comboBoxes.size(); i++)
+    {
+        comboBoxes[i]->setEditableText(false);
+        comboBoxes[i]->setJustificationType(Justification::centred);
+        comboBoxes[i]->setColour(ComboBox::backgroundColourId, clblue);
+        comboBoxes[i]->setColour(ComboBox::outlineColourId, clblue);
+        comboBoxes[i]->setColour(ComboBox::buttonColourId, clblue);
+        comboBoxes[i]->setColour(ComboBox::arrowColourId, cdark);
+        comboBoxes[i]->setColour(ComboBox::textColourId, cdark);
+        comboBoxes[i]->setLookAndFeel(&SMLF);
+        addAndMakeVisible(comboBoxes[i]);
+    }
+    
+    m_portListCB.setTextWhenNothingSelected(String("select device"));
+    m_portListCB.onChange = [this] { updateBridgeSettings(); };
+    refreshPortList();
 
-	m_yprOrderCB.setEditableText(false);
-	m_yprOrderCB.setJustificationType(Justification::centred);
-	StringArray rpyKeys = { "Roll, Pitch, Yaw", "Yaw, Pitch, Roll", "Pitch, Roll, Yaw", "Yaw, Roll, Pitch", "Roll, Yaw, Pitch", "Pitch, Yaw, Roll" };
-	m_yprOrderCB.addItemList(rpyKeys, 1);
-	m_yprOrderCB.setSelectedId(1, dontSendNotification);
-	m_yprOrderCB.setLookAndFeel(&SMLF);
-	m_yprOrderCB.onChange = [this] { updateBridgeSettings(); };
-	addAndMakeVisible(m_yprOrderCB);
+    StringArray rpyKeys = { "Roll, Pitch, Yaw", "Yaw, Pitch, Roll", "Pitch, Roll, Yaw", "Yaw, Roll, Pitch", "Roll, Yaw, Pitch", "Pitch, Yaw, Roll" };
+    m_yprOrderCB.addItemList(rpyKeys, 1);
+    m_yprOrderCB.setSelectedId(1, dontSendNotification);
+    m_yprOrderCB.onChange = [this] { updateBridgeSettings(); };
 
-	m_oscPresetCB.setEditableText(false);
-	m_oscPresetCB.setJustificationType(Justification::centred);
-	m_oscPresetCB.setLookAndFeel(&SMLF);
-	m_oscPresetCB.onChange = [this] { loadPreset(m_oscPresetCB.getSelectedId()); };
-	if (loadPresetXml())
-	{
-		StringArray presets;
-		for (int id = 1; id <= presetList->getNumChildElements(); ++id)
-		{
-			presets.add(presetList->getChildByAttribute("ID", String(id))->getStringAttribute("name"));
-		}
-		m_oscPresetCB.addItemList(presets, 1);
-		m_oscPresetCB.setTextWhenNothingSelected(String("select preset"));
-	}
-	else
-	{
-		m_oscPresetCB.setTextWhenNothingSelected(String("presets.xml file is missing"));
-	}
-	addAndMakeVisible(m_oscPresetCB);
+    m_oscPresetCB.onChange = [this] { loadPreset(m_oscPresetCB.getSelectedId()); };
+    if (loadPresetXml())
+    {
+        StringArray presets;
+        for (int id = 1; id <= presetList->getNumChildElements(); ++id)
+        {
+            presets.add(presetList->getChildByAttribute("ID", String(id))->getStringAttribute("name"));
+        }
+        m_oscPresetCB.addItemList(presets, 1);
+        m_oscPresetCB.setTextWhenNothingSelected(String("select preset"));
+    }
+    else
+    {
+        m_oscPresetCB.setTextWhenNothingSelected(String("presets.xml file is missing"));
+    }
 
 	// labels
 	Array<Label*> rpyValLabels;
@@ -145,7 +124,7 @@ MainComponent::MainComponent()
 	rpyValLabels.add(&m_pitchOscVal);
 	rpyValLabels.add(&m_yawOscVal);
 
-	for (int i = 0; i < rpyValLabels.size(); ++i)
+	for (int i = 0; i < rpyValLabels.size(); i++)
 	{
 		rpyValLabels[i]->setFont(labelfont.withPointHeight(13));
 		rpyValLabels[i]->setJustificationType(Justification::centredRight);
@@ -169,11 +148,10 @@ MainComponent::MainComponent()
 	oscLabels.add(&m_ipAddress);
 	oscLabels.add(&m_portNumber);
 
-	for (int i = 0; i < oscLabels.size(); ++i)
+	for (int i = 0; i < oscLabels.size(); i++)
 	{
 		oscLabels[i]->setEditable(false, true, false);
 		oscLabels[i]->onTextChange = [this] { updateBridgeSettings(); };
-		//oscLabels[i]->setColour(Label::outlineColourId, clrblue);
 		oscLabels[i]->setLookAndFeel(&SMLF);
 		oscLabels[i]->setColour(Label::textColourId, cdark);
 		oscLabels[i]->setColour(Label::backgroundColourId, clrblue);
@@ -225,7 +203,7 @@ void MainComponent::paint (Graphics& g)
 	g.drawText("IMU Orientation", imuLabelArea.removeFromRight(270), Justification::left);
 	g.drawText("Output Configuration", oscLabelArea.removeFromRight(270), Justification::left);
 
-	g.drawImageAt(iserial, 210, 52);
+	//g.drawImageAt(iserial, 210, 52);
 
 	// other texts
 	g.setFont(titlefontB.withPointHeight(14));
@@ -248,8 +226,8 @@ void MainComponent::paint (Graphics& g)
 	// version number & authors
 	g.setFont(titlefontB.withPointHeight(12));
 	g.setColour(clblue);
-	g.drawText("version 3.1", 10, getHeight() - 30, 280, 20, Justification::bottomLeft);
-	g.drawText("2021 Tomasz Rudzki, Jacek Majer", 10, getHeight() - 30, 280, 20, Justification::bottomRight);
+	g.drawText("version 3.2", 10, getHeight() - 30, 280, 20, Justification::bottomLeft);
+	g.drawText("2023 Tomasz Rudzki, Jacek Majer", 10, getHeight() - 30, 280, 20, Justification::bottomRight);
 }
 
 void MainComponent::resized()
@@ -525,7 +503,6 @@ void MainComponent::saveSettings()
 
 void MainComponent::loadPreset(int id)
 {
-	//if (id <= presetList->getNumChildElements())
 	if (presetList != nullptr)
 	{
 		XmlElement* preset = presetList->getChildByAttribute("ID", String(id));

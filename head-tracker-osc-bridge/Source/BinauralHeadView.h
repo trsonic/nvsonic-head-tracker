@@ -23,8 +23,6 @@ class BinauralHeadView
 {
 public:
 	BinauralHeadView();
-	void init();
-	void deinit();
 
 	void setHeadOrientation(float roll, float pitch, float yaw);
 
@@ -44,8 +42,7 @@ private:
 
 	Matrix3D<float> getViewMatrix() const
 	{
-		Matrix3D<float> viewMatrix({ 0.0f, 0.0f, -5.0f });
-		return viewMatrix;
+        return Matrix3D<float>::fromTranslation ({ 0.0f, 0.0f, -5.0f });
 	}
 
 	Matrix3D<float> getModelMatrix() const

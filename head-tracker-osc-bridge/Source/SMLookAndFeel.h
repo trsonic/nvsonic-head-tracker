@@ -23,13 +23,8 @@
 
 #pragma once
 
-class SMLookAndFeel : public LookAndFeel_V3
+struct SMLookAndFeel : public LookAndFeel_V4
 {
-public:
-	SMLookAndFeel()
-	{
-		setColour(Slider::rotarySliderFillColourId, Colours::red);
-	}
 
 	const Colour clblue = Colour::fromRGBA(101, 128, 200, 255); // light blue
 	const Colour cgrey = Colour::fromRGBA(62, 62, 62, 255); //  grey
@@ -41,17 +36,14 @@ public:
 		bool isMouseOverButton, bool isButtonDown) override
 	{
 		Rectangle<int> buttonArea = button.getLocalBounds();
-		if (isMouseOverButton == false) {
+		if (isMouseOverButton == false)
+        {
 			g.setColour(backgroundColour);
 		}
-		else {
-			if (isButtonDown == false) {
-				g.setColour(clrblue);
-			}
-			else {
-				g.setColour(backgroundColour);
-			}
-
+		else
+        {
+            if (isButtonDown == false) g.setColour(clrblue);
+            else g.setColour(backgroundColour);
 		}
 
 		g.fillRoundedRectangle(buttonArea.toFloat(), 3.0f);
@@ -85,21 +77,6 @@ public:
 		g.setColour(clrblue);
 		g.fillRoundedRectangle(0, 0, width, height, 3.0f);
 
-		//g.fillAll(clrblue);
-		// const Colour buttonColour(box.findColour(ComboBox::buttonColourId));
-
-		//if (box.isEnabled() && box.hasKeyboardFocus(false))
-		//{
-		//	g.setColour(clrblue);
-		//	g.fillRoundedRectangle(0, 0, width, height, 3.0f);
-		//}
-		//else
-		//{
-		//	g.setColour(clblue);
-		//	//g.drawRect(0, 0, width, height);
-		//	g.fillRoundedRectangle(0, 0, width, height, 3.0f);
-		//}
-
 		const float arrowX = 0.3f;
 		const float arrowH = 0.2f;
 
@@ -118,7 +95,6 @@ public:
 
 	void drawLabel(Graphics& g, Label& label) override
 	{
-		//g.fillAll(label.findColour(Label::backgroundColourId));
 		g.setColour(label.findColour(Label::backgroundColourId));
 		g.fillRoundedRectangle(label.getLocalBounds().toFloat(), 3.0f);
 
@@ -142,7 +118,5 @@ public:
 		{
 			g.setColour(label.findColour(Label::outlineColourId));
 		}
-
-		//g.drawRect(label.getLocalBounds());
 	}
 };
