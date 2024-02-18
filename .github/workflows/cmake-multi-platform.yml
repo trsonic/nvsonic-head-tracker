@@ -5,9 +5,9 @@ name: CMake on multiple platforms
 on:
   workflow_dispatch:
   push:
-    branches: [ "develop"]
+    branches: [ '*' ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ '*' ]
 
 jobs:
   build:
