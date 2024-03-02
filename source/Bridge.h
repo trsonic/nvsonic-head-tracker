@@ -22,7 +22,6 @@
 */
 
 #pragma once
-
 #include <juce_core/juce_core.h>
 #include <juce_events/juce_events.h>
 #include <juce_osc/juce_osc.h>
@@ -33,7 +32,7 @@ class Bridge : private juce::Timer, private juce::OSCReceiver, private juce::OSC
 {
 public:
     Bridge();
-    ~Bridge();
+    ~Bridge() override;
     bool connectOscReceiver();
     void disconnectOscReceiver();
 

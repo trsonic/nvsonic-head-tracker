@@ -37,7 +37,7 @@ class MainComponent : public juce::Component,
 {
 public:
     MainComponent();
-    ~MainComponent();
+    ~MainComponent() override;
 
     SMLookAndFeel SMLF;
 

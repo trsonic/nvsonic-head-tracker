@@ -30,9 +30,9 @@
 namespace ProjectInfo
 {
     const char* const projectName = "Head Tracker OSC Bridge";
-    const char* const companyName = "nvsonic";
+    // const char* const companyName = "nvsonic";
     const char* const versionString = "3.0";
-    const int versionNumber = 0x30000;
+    // const int versionNumber = 0x30000;
 }
 #endif
 

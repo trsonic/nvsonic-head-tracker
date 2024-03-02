@@ -6,6 +6,7 @@ set(PROJECT_NAME "HeadTrackerOSCBridge")
 set(PRODUCT_NAME "Head Tracker OSC Bridge")
 set(COMPANY_NAME "nvsonic")
 set(BUNDLE_ID "com.nvsonic.htoscbridge")
+set(CURRENT_VERSION "4.0")
 
 project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 
@@ -30,7 +31,6 @@ target_sources(${PROJECT_NAME}
         source/Bridge.h
         source/Bridge.cpp
         source/BinauralHeadView.h
-        source/BinauralHeadView.cpp
         source/rs232.h
         source/rs232-linux.c
         source/rs232-win.c
