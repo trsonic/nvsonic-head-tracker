@@ -13,18 +13,18 @@ project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 add_subdirectory(JUCE)
 
 juce_add_gui_app(${PROJECT_NAME}
-    VERSION ...                       # Set this if the app version is different to the project version
-    # ICON_BIG ...                      # ICON_* arguments specify a path to an image file to use as an icon
-    # ICON_SMALL ...
-    # DOCUMENT_EXTENSIONS ...           # Specify file extensions that should be associated with this app
-    ${COMPANY_NAME} ...                  # Specify the name of the app's author
-    ${PRODUCT_NAME})     # The name of the final executable, which can differ from the target name
+        VERSION ...                       # Set this if the app version is different to the project version
+        # ICON_BIG ...                      # ICON_* arguments specify a path to an image file to use as an icon
+        # ICON_SMALL ...
+        # DOCUMENT_EXTENSIONS ...           # Specify file extensions that should be associated with this app
+        ${COMPANY_NAME} ...                  # Specify the name of the app's author
+        ${PRODUCT_NAME})     # The name of the final executable, which can differ from the target name
 
 
 # juce_generate_juce_header(${PROJECT_NAME}) # recommended to avoid
 
 target_sources(${PROJECT_NAME}
-    PRIVATE
+        PRIVATE
         source/Main.cpp
         source/MainComponent.h
         source/MainComponent.cpp
@@ -39,7 +39,7 @@ target_sources(${PROJECT_NAME}
 )
 
 target_compile_definitions(${PROJECT_NAME}
-    PRIVATE
+        PRIVATE
         # JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
         JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_gui_app` call
         JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_gui_app` call
@@ -48,23 +48,23 @@ target_compile_definitions(${PROJECT_NAME}
 )
 
 juce_add_binary_data(resources SOURCES
-    resources/male_head.obj
-    resources/Tbold.ttf
-    resources/segoeui.ttf
-    resources/axis.png
-    resources/osc.png
-    resources/serial.png
+        resources/male_head.obj
+        resources/Tbold.ttf
+        resources/segoeui.ttf
+        resources/axis.png
+        resources/osc.png
+        resources/serial.png
 )
 
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE
+        PRIVATE
         resources
         juce::juce_core
         juce::juce_gui_basics
         juce::juce_events
         juce::juce_osc
         juce::juce_opengl
-    PUBLIC
+        PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags
